@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Detail — Your Name</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .detail-layout {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100%;
+    }
+
+    /* ── archive tab bar ── */
+    .tab-bar {
+      border-bottom: 0.5px solid rgba(0,0,0,0.22);
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      padding: 0 24px;
+      background: var(--bg);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    .tab-bar::-webkit-scrollbar { height: 0; }
+
+    .archive-tab {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 18px;
+      cursor: pointer;
+      border: 0.5px solid transparent;
+      border-bottom: none;
+      color: var(--ink-light);
+      background: transparent;
+      white-space: nowrap;
+      transition: color 0.15s, background 0.15s;
+      position: relative;
+      bottom: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .archive-tab:hover { color: var(--ink); }
+    .archive-tab.active {
+      color: var(--ink);
+      background: var(--paper);
+      border-color: rgba(0,0,0,0.22);
+      border-bottom-color: var(--paper);
+    }
+    .tab-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: currentColor; opacity: 0.5;
+    }
+    .archive-tab.active .tab-dot { background: var(--accent); opacity: 1; }
+
+    /* ── tab content ── */
+    .tab-content-area {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tab-panel {
+      display: none;
+      height: 100%;
+      overflow-y: auto;
+      padding: 28px 28px;
+    }
+    .tab-panel::-webkit-scrollbar { width: 4px; }
+    .tab-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
+    .tab-panel.active {
+      display: grid;
+      animation: panelIn 0.25s ease forwards;
+    }
+
+    @keyframes panelIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── overview panel ── */
+    #tab-overview {
+      grid-template-columns: 1fr 260px;
+      gap: 32px;
+      align-content: start;
+    }
+
+    .overview-main { display: flex; flex-direction: column; gap: 14px; }
+    .proj-num {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.2em; color: var(--ink-light);
+      text-transform: uppercase;
+    }
+    .proj-title {
+      font-family: var(--condensed);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 0.93;
+      letter-spacing: -0.01em;
+    }
+    .proj-tagline {
+      font-size: 14px; color: #555; line-height: 1.65;
+      font-weight: 300; max-width: 520px;
+    }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; }
+    .ptag {
+      font-family: var(--mono); font-size: 8.5px;
+      letter-spacing: 0.08em; padding: 3px 8px;
+      border: 0.5px solid rgba(0,0,0,0.28);
+      text-transform: uppercase;
+    }
+
+    .overview-sidebar { display: flex; flex-direction: column; gap: 14px; }
+    .spec-card {
+      border: 0.5px solid rgba(0,0,0,0.2);
+      padding: 14px;
+      background: var(--paper);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .spec-card-title {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.18em; color: var(--ink-light);
+      text-transform: uppercase;
+    }
+    .spec-row { display: flex; flex-direction: column; gap: 2px; }
+    .spec-label {
+      font-family: var(--mono); font-size: 8px;
+      letter-spacing: 0.12em; color: var(--ink-light);
+      text-transform: uppercase;
+    }
+    .spec-val {
+      font-family: var(--mono); font-size: 10.5px;
+      color: var(--ink); letter-spacing: 0.05em;
+    }
+    .spec-divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.15); }
+
+    .action-btn {
+      padding: 10px 14px;
+      border: 0.5px solid rgba(0,0,0,0.35);
+      background: var(--ink); color: var(--paper);
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none; text-align: center;
+      display: block;
+      transition: background 0.15s;
+    }
+    .action-btn:hover { background: var(--accent); border-color: var(--accent); }
+    .action-btn.outline {
+      background: transparent; color: var(--ink);
+    }
+    .action-btn.outline:hover { background: rgba(0,0,0,0.06); }
+
+    /* ── tech stack panel ── */
+    #tab-stack { grid-template-columns: 1fr 1fr; gap: 20px; align-content: start; }
+
+    .stack-section { display: flex; flex-direction: column; gap: 10px; }
+    .stack-section-title {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.18em; color: var(--ink-light);
+      text-transform: uppercase; padding-bottom: 6px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.15);
+    }
+    .stack-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px;
+      border: 0.5px solid rgba(0,0,0,0.15);
+      background: var(--paper);
+    }
+    .stack-icon {
+      font-family: var(--mono); font-size: 9px;
+      color: var(--ink-light); min-width: 24px;
+      letter-spacing: 0.05em;
+    }
+    .stack-name { font-size: 13px; font-weight: 500; }
+    .stack-role { font-family: var(--mono); font-size: 9px; color: var(--ink-light); margin-left: auto; letter-spacing: 0.08em; }
+
+    /* ── timeline panel ── */
+    #tab-timeline { grid-template-columns: 1fr; align-content: start; gap: 0; }
+
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px; top: 8px; bottom: 8px;
+      width: 0.5px; background: rgba(0,0,0,0.2);
+    }
+    .timeline-item {
+      position: relative;
+      padding: 0 0 24px 20px;
+      animation: fadeUp 0.3s ease forwards;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -22px; top: 6px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ink);
+      border: 2px solid var(--bg);
+    }
+    .timeline-dot.accent { background: var(--accent); }
+    .tl-date {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.12em; color: var(--ink-light);
+      text-transform: uppercase; margin-bottom: 3px;
+    }
+    .tl-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .tl-desc { font-size: 12.5px; color: #555; line-height: 1.6; font-weight: 300; }
+
+    /* ── media panel ── */
+    #tab-media { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; align-content: start; }
+
+    .media-card {
+      aspect-ratio: 16/10;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: var(--ink);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .media-card::after {
+      content: attr(data-label);
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.12em; color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+    }
+
+    /* ── notes panel ── */
+    #tab-notes { grid-template-columns: 1fr; align-content: start; gap: 0; }
+
+    .notes-area {
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: var(--paper);
+      padding: 20px;
+      min-height: 300px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--ink);
+      resize: none;
+      width: 100%;
+      outline: none;
+      letter-spacing: 0.04em;
+    }
+    .notes-header {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.18em; color: var(--ink-light);
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    hr.panel-divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.15); margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <div class="grid-overlay">
+      <div class="gl gl-v" style="left:60%"></div>
+      <div class="crosshair" style="top:50%;left:60%"></div>
+      <div class="reg-mark" style="top:28px;left:0"></div>
+      <div class="reg-mark" style="top:28px;right:0"></div>
+    </div>
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="projects.html" data-nav style="color:inherit;text-decoration:none;letter-spacing:0.13em;">← PROJECTS</a>
+        <span>PROJECT DETAIL</span>
+        <span>CASE STUDY</span>
+      </div>
+      <div class="topbar-right">
+        <span>DISK_001</span>
+        <span>2025</span>
+      </div>
+    </header>
+
+    <div class="color-bar top">
+      <div class="cs cs-red"></div><div class="cs cs-orange"></div>
+      <div class="cs cs-yellow"></div><div class="cs cs-white"></div>
+      <div class="cs cs-hatch"></div>
+    </div>
+
+    <div class="content-area">
+      <div class="detail-layout">
+
+        <!-- archive tab bar -->
+        <div class="tab-bar">
+          <div class="archive-tab active" data-tab="overview"><span class="tab-dot"></span>Overview</div>
+          <div class="archive-tab" data-tab="stack"><span class="tab-dot"></span>Tech Stack</div>
+          <div class="archive-tab" data-tab="timeline"><span class="tab-dot"></span>Timeline</div>
+          <div class="archive-tab" data-tab="media"><span class="tab-dot"></span>Media</div>
+          <div class="archive-tab" data-tab="notes"><span class="tab-dot"></span>Dev Notes</div>
+        </div>
+
+        <!-- panels -->
+        <div class="tab-content-area">
+
+          <!-- OVERVIEW -->
+          <div class="tab-panel active" id="tab-overview">
+            <div class="overview-main">
+              <div class="proj-num">DISK_001 · 2024</div>
+              <div class="proj-title">Project<br>Alpha</div>
+              <p class="proj-tagline">A compelling one-liner about what this project does and why it matters. You can expand into the problem, your approach, and the outcome here. Keep it punchy but informative.</p>
+              <div class="tag-row">
+                <span class="ptag">React</span>
+                <span class="ptag">TypeScript</span>
+                <span class="ptag">Node.js</span>
+                <span class="ptag">PostgreSQL</span>
+                <span class="ptag">Docker</span>
+              </div>
+            </div>
+            <div class="overview-sidebar">
+              <div class="spec-card">
+                <div class="spec-card-title">// Spec Sheet</div>
+                <div class="spec-row">
+                  <span class="spec-label">Role</span>
+                  <span class="spec-val">Full-Stack Engineer</span>
+                </div>
+                <hr class="spec-divider">
+                <div class="spec-row">
+                  <span class="spec-label">Status</span>
+                  <span class="spec-val">Shipped ✓</span>
+                </div>
+                <hr class="spec-divider">
+                <div class="spec-row">
+                  <span class="spec-label">Team Size</span>
+                  <span class="spec-val">Solo</span>
+                </div>
+                <hr class="spec-divider">
+                <div class="spec-row">
+                  <span class="spec-label">Duration</span>
+                  <span class="spec-val">3 months</span>
+                </div>
+                <hr class="spec-divider">
+                <div class="spec-row">
+                  <span class="spec-label">Year</span>
+                  <span class="spec-val">2024</span>
+                </div>
+              </div>
+              <a class="action-btn" href="#" target="_blank">↗ Live Demo</a>
+              <a class="action-btn outline" href="#" target="_blank">⊕ View Source</a>
+            </div>
+          </div>
+
+          <!-- TECH STACK -->
+          <div class="tab-panel" id="tab-stack">
+            <div class="stack-section">
+              <div class="stack-section-title">// Frontend</div>
+              <div class="stack-item"><span class="stack-icon">01</span><span class="stack-name">React 18</span><span class="stack-role">UI Framework</span></div>
+              <div class="stack-item"><span class="stack-icon">02</span><span class="stack-name">TypeScript</span><span class="stack-role">Language</span></div>
+              <div class="stack-item"><span class="stack-icon">03</span><span class="stack-name">Tailwind CSS</span><span class="stack-role">Styling</span></div>
+            </div>
+            <div class="stack-section">
+              <div class="stack-section-title">// Backend</div>
+              <div class="stack-item"><span class="stack-icon">04</span><span class="stack-name">Node.js</span><span class="stack-role">Runtime</span></div>
+              <div class="stack-item"><span class="stack-icon">05</span><span class="stack-name">PostgreSQL</span><span class="stack-role">Database</span></div>
+              <div class="stack-item"><span class="stack-icon">06</span><span class="stack-name">Redis</span><span class="stack-role">Cache</span></div>
+            </div>
+            <div class="stack-section">
+              <div class="stack-section-title">// Infrastructure</div>
+              <div class="stack-item"><span class="stack-icon">07</span><span class="stack-name">Docker</span><span class="stack-role">Containers</span></div>
+              <div class="stack-item"><span class="stack-icon">08</span><span class="stack-name">AWS EC2</span><span class="stack-role">Hosting</span></div>
+            </div>
+            <div class="stack-section">
+              <div class="stack-section-title">// Tooling</div>
+              <div class="stack-item"><span class="stack-icon">09</span><span class="stack-name">Vite</span><span class="stack-role">Build</span></div>
+              <div class="stack-item"><span class="stack-icon">10</span><span class="stack-name">GitHub Actions</span><span class="stack-role">CI/CD</span></div>
+            </div>
+          </div>
+
+          <!-- TIMELINE -->
+          <div class="tab-panel" id="tab-timeline">
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-dot accent"></div>
+                <div class="tl-date">Week 1–2</div>
+                <div class="tl-title">Scoping & Architecture</div>
+                <div class="tl-desc">Defined the problem space, researched existing solutions, and designed the system architecture. Set up monorepo, CI/CD pipeline, and initial DB schema.</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="tl-date">Week 3–5</div>
+                <div class="tl-title">Core Backend</div>
+                <div class="tl-desc">Built the API layer, authentication system, and primary data models. Implemented caching strategy and optimized queries for performance.</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="tl-date">Week 6–9</div>
+                <div class="tl-title">Frontend Build</div>
+                <div class="tl-desc">Developed the full UI from wireframes. Integrated with backend APIs, handled edge cases and loading states, polished interactions.</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="tl-date">Week 10–11</div>
+                <div class="tl-title">Testing & QA</div>
+                <div class="tl-desc">Wrote unit and integration tests. Load tested the API. Fixed bugs found in user testing sessions.</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot accent"></div>
+                <div class="tl-date">Week 12</div>
+                <div class="tl-title">Deployment & Launch</div>
+                <div class="tl-desc">Deployed to production. Monitored metrics for the first week post-launch. Shipped minor patches based on early user feedback.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEDIA -->
+          <div class="tab-panel" id="tab-media">
+            <div class="media-card" data-label="Screenshot 01"></div>
+            <div class="media-card" data-label="Screenshot 02"></div>
+            <div class="media-card" data-label="Architecture Diagram"></div>
+            <div class="media-card" data-label="Mobile View"></div>
+            <div class="media-card" data-label="Dashboard"></div>
+            <div class="media-card" data-label="Add Screenshot"></div>
+          </div>
+
+          <!-- DEV NOTES -->
+          <div class="tab-panel" id="tab-notes">
+            <div class="notes-header">// dev_notes.txt — editable</div>
+            <textarea class="notes-area" spellcheck="false" placeholder="Add development notes, learnings, challenges, or reflections here...
+
+// CHALLENGES
+- Describe a technical challenge you faced and how you solved it.
+
+// LEARNINGS  
+- What did this project teach you?
+- What would you do differently?
+
+// IMPACT
+- User count, performance metrics, or other measurable outcomes.
+            "></textarea>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="color-bar bottom">
+      <div class="cs cs-red"></div><div class="cs cs-orange"></div>
+      <div class="cs cs-yellow"></div><div class="cs cs-white"></div>
+      <div class="cs cs-hatch"></div>
+    </div>
+    <footer class="bottom-bar">
+      <div class="bb-left">YOUR-NAME<br>CASE STUDY</div>
+      <div class="bb-center">PROJECT ALPHA · DISK_001</div>
+      <div class="bb-right">ARCHIVE<br>TEMPLATE</div>
+    </footer>
+  </div>
+
+  <script src="nav.js"></script>
+  <script>
+    document.querySelectorAll('.archive-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.archive-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

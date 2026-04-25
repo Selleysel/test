@@ -1,0 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300&family=Barlow+Condensed:wght@400;700;900&display=swap');
+
+/* ── reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #d6d0c8;
+  --bg-dark:   #111014;
+  --ink:       #111014;
+  --ink-mid:   #555;
+  --ink-light: #888;
+  --accent:    #e8320a;
+  --accent2:   #f0b800;
+  --green:     #00ffb4;
+  --paper:     #e8e4dc;
+  --mono:      'Share Tech Mono', monospace;
+  --condensed: 'Barlow Condensed', sans-serif;
+  --sans:      'Barlow', sans-serif;
+  --grid-line: rgba(0,0,0,0.1);
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+/* ── page transitions ── */
+.page-wrapper {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: pageIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+@keyframes pageIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-exit {
+  animation: pageOut 0.3s cubic-bezier(0.4,0,1,1) forwards !important;
+}
+
+@keyframes pageOut {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* ── grid overlay ── */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.gl { position: absolute; background: var(--grid-line); }
+.gl-h { left: 0; right: 0; height: 0.5px; }
+.gl-v { top: 0; bottom: 0; width: 0.5px; }
+.crosshair {
+  position: absolute;
+  width: 10px; height: 10px;
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+}
+.reg-mark {
+  position: absolute;
+  width: 5px; height: 5px;
+  background: var(--ink);
+}
+
+/* ── topbar ── */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 28px;
+  border-bottom: 0.5px solid rgba(0,0,0,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  z-index: 100;
+  background: var(--bg);
+}
+.topbar-left { display: flex; gap: 18px; }
+.topbar-right { display: flex; gap: 18px; align-items: center; }
+.status-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+  animation: pulse 2.2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+/* ── color bar ── */
+.color-bar {
+  position: fixed;
+  left: 0; right: 0;
+  height: 10px;
+  display: flex;
+  z-index: 100;
+}
+.color-bar.top { top: 28px; border-bottom: 0.5px solid rgba(0,0,0,0.2); }
+.color-bar.bottom { bottom: 48px; border-top: 0.5px solid rgba(0,0,0,0.2); }
+.cs { flex: 1; }
+.cs-red    { background: #e8320a; }
+.cs-orange { background: #f06b1a; }
+.cs-yellow { background: #f0b800; }
+.cs-white  { background: #e8e4de; flex: 3; }
+.cs-hatch  {
+  flex: 1;
+  background: repeating-linear-gradient(-45deg,#111 0,#111 2px,transparent 2px,transparent 7px);
+}
+
+/* ── bottom bar ── */
+.bottom-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 48px;
+  background: var(--bg-dark);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 100;
+}
+.bb-left, .bb-right {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: #444;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.bb-right { text-align: right; }
+.bb-center {
+  font-family: var(--condensed);
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── main content area ── */
+.content-area {
+  position: fixed;
+  top: 48px; /* topbar + colorbar */
+  bottom: 58px; /* colorbar + bottombar */
+  left: 0; right: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* ── nav link transition helper ── */
+a.nav-link {
+  text-decoration: none;
+  cursor: pointer;
+}

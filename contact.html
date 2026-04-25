@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Your Name</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      height: 100%;
+    }
+
+    /* ── left — contact cards ── */
+    .contact-left {
+      border-right: 0.5px solid rgba(0,0,0,0.2);
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      overflow-y: auto;
+    }
+    .contact-left::-webkit-scrollbar { width: 4px; }
+
+    .contact-header { margin-bottom: 20px; }
+    .contact-title {
+      font-family: var(--condensed);
+      font-size: 2.8rem; font-weight: 900;
+      text-transform: uppercase; line-height: 0.93;
+      margin-bottom: 8px;
+    }
+    .contact-sub {
+      font-family: var(--mono); font-size: 9.5px;
+      letter-spacing: 0.12em; color: var(--ink-light);
+      text-transform: uppercase;
+    }
+
+    /* contact entry */
+    .contact-entry {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 0.5px solid rgba(0,0,0,0.12);
+      text-decoration: none;
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .contact-entry:first-of-type { border-top: 0.5px solid rgba(0,0,0,0.12); }
+    .contact-entry:hover { padding-left: 6px; }
+    .contact-entry:hover .ce-arrow { opacity: 1; transform: translate(2px,-2px); }
+
+    .ce-icon {
+      width: 36px; height: 36px;
+      border: 0.5px solid rgba(0,0,0,0.28);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--ink); background: var(--paper);
+      flex-shrink: 0;
+    }
+    .ce-body { display: flex; flex-direction: column; gap: 1px; }
+    .ce-label {
+      font-family: var(--mono); font-size: 8.5px;
+      letter-spacing: 0.15em; color: var(--ink-light);
+      text-transform: uppercase;
+    }
+    .ce-val {
+      font-size: 13px; color: var(--ink); font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+    .ce-sub {
+      font-family: var(--mono); font-size: 9px;
+      color: var(--ink-light); letter-spacing: 0.06em;
+    }
+    .ce-arrow {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--ink-light); opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    /* copy tooltip */
+    .copied-toast {
+      position: fixed;
+      bottom: 70px; left: 50%; transform: translateX(-50%);
+      background: var(--ink); color: var(--paper);
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 8px 16px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 200;
+    }
+    .copied-toast.show { opacity: 1; }
+
+    /* ── right — business card + extra ── */
+    .contact-right {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card-section-label {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.18em; color: var(--ink-light);
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+
+    /* Business card */
+    .biz-card-wrapper {
+      perspective: 800px;
+    }
+    .biz-card {
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 1.75 / 1;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
+      cursor: pointer;
+    }
+    .biz-card:hover { transform: rotateY(180deg); }
+
+    .bc-face {
+      position: absolute; inset: 0;
+      backface-visibility: hidden;
+      border: 0.5px solid rgba(0,0,0,0.3);
+    }
+    .bc-front {
+      background: var(--bg-dark);
+      display: grid;
+      grid-template-columns: 1fr;
+      padding: 16px 18px;
+      gap: 0;
+    }
+
+    /* color strip on card */
+    .bc-strip {
+      height: 4px;
+      display: flex;
+      position: absolute; top: 0; left: 0; right: 0;
+    }
+    .bc-strip-r { flex:1; background:#e8320a; }
+    .bc-strip-o { flex:1; background:#f06b1a; }
+    .bc-strip-y { flex:1; background:#f0b800; }
+    .bc-strip-w { flex:3; background:#e8e4de; }
+
+    .bc-name {
+      font-family: var(--condensed); font-size: 1.3rem;
+      font-weight: 900; text-transform: uppercase;
+      color: #fff; margin-top: 14px; line-height: 1;
+    }
+    .bc-role {
+      font-family: var(--mono); font-size: 8.5px;
+      letter-spacing: 0.12em; color: #555;
+      text-transform: uppercase; margin-top: 4px;
+    }
+    .bc-contact-line {
+      margin-top: auto;
+      font-family: var(--mono); font-size: 8.5px;
+      letter-spacing: 0.08em; color: #444;
+      line-height: 1.7;
+    }
+    .bc-contact-line span { color: #888; }
+
+    .bc-back {
+      background: var(--paper);
+      transform: rotateY(180deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bc-back-logo {
+      font-family: var(--condensed);
+      font-size: 2rem; font-weight: 900;
+      text-transform: uppercase; color: var(--ink);
+      letter-spacing: 0.04em;
+    }
+    .bc-back-url {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.12em; color: var(--ink-light);
+      text-transform: uppercase;
+    }
+    .bc-placeholder-text {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.1em; color: var(--ink-light);
+      text-transform: uppercase; text-align: center;
+      padding: 0 20px;
+    }
+
+    /* Future space */
+    .future-space {
+      border: 0.5px dashed rgba(0,0,0,0.22);
+      padding: 20px;
+      background: rgba(255,255,255,0.3);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .future-label {
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 0.18em; color: var(--ink-light);
+      text-transform: uppercase; text-align: center;
+    }
+    .future-icon {
+      font-size: 1.8rem; opacity: 0.25;
+    }
+
+    /* location tag */
+    .location-tag {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: var(--paper);
+    }
+    .loc-icon {
+      font-family: var(--mono); font-size: 11px; color: var(--ink-light);
+    }
+    .loc-text { font-size: 12.5px; color: var(--ink); }
+    .loc-coords {
+      font-family: var(--mono); font-size: 9px;
+      color: var(--ink-light); letter-spacing: 0.08em;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <div class="grid-overlay">
+      <div class="gl gl-h" style="top:50%"></div>
+      <div class="gl gl-v" style="left:50%"></div>
+      <div class="crosshair" style="top:50%;left:50%"></div>
+      <div class="reg-mark" style="top:28px;left:0"></div>
+      <div class="reg-mark" style="top:28px;right:0"></div>
+    </div>
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="index.html" data-nav style="color:inherit;text-decoration:none;letter-spacing:0.13em;">← HOME</a>
+        <span>CONTACT</span>
+        <span>GET IN TOUCH</span>
+      </div>
+      <div class="topbar-right">
+        <span class="status-dot"></span>
+        <span>OPEN TO WORK</span>
+        <span>RIVERSIDE, CA</span>
+      </div>
+    </header>
+
+    <div class="color-bar top">
+      <div class="cs cs-red"></div><div class="cs cs-orange"></div>
+      <div class="cs cs-yellow"></div><div class="cs cs-white"></div>
+      <div class="cs cs-hatch"></div>
+    </div>
+
+    <div class="content-area">
+      <div class="contact-layout">
+
+        <!-- left: contact entries -->
+        <div class="contact-left">
+          <div class="contact-header">
+            <div class="contact-title">Get In<br>Touch</div>
+            <div class="contact-sub">// click any entry to copy or open</div>
+          </div>
+
+          <a class="contact-entry" href="mailto:you@email.com" onclick="copyAndOpen(event,'you@email.com')">
+            <div class="ce-icon">ML</div>
+            <div class="ce-body">
+              <span class="ce-label">Email</span>
+              <span class="ce-val">you@email.com</span>
+              <span class="ce-sub">Personal</span>
+            </div>
+            <span class="ce-arrow">↗</span>
+          </a>
+
+          <a class="contact-entry" href="mailto:yourname@ucr.edu" onclick="copyAndOpen(event,'yourname@ucr.edu')">
+            <div class="ce-icon">EDU</div>
+            <div class="ce-body">
+              <span class="ce-label">School Email</span>
+              <span class="ce-val">yourname@ucr.edu</span>
+              <span class="ce-sub">UC Riverside</span>
+            </div>
+            <span class="ce-arrow">↗</span>
+          </a>
+
+          <a class="contact-entry" href="https://linkedin.com/in/yourname" target="_blank">
+            <div class="ce-icon">LI</div>
+            <div class="ce-body">
+              <span class="ce-label">LinkedIn</span>
+              <span class="ce-val">linkedin.com/in/yourname</span>
+              <span class="ce-sub">Professional profile</span>
+            </div>
+            <span class="ce-arrow">↗</span>
+          </a>
+
+          <div class="contact-entry" onclick="copyVal('+1 (555) 000-0000')">
+            <div class="ce-icon">PH</div>
+            <div class="ce-body">
+              <span class="ce-label">Phone</span>
+              <span class="ce-val">+1 (555) 000-0000</span>
+              <span class="ce-sub">Click to copy</span>
+            </div>
+            <span class="ce-arrow">⊕</span>
+          </div>
+
+          <div class="contact-entry" onclick="copyVal('yourhandle#0000')">
+            <div class="ce-icon">DC</div>
+            <div class="ce-body">
+              <span class="ce-label">Discord</span>
+              <span class="ce-val">yourhandle</span>
+              <span class="ce-sub">Click to copy tag</span>
+            </div>
+            <span class="ce-arrow">⊕</span>
+          </div>
+
+          <div class="contact-entry" style="cursor:default">
+            <div class="ce-icon">📍</div>
+            <div class="ce-body">
+              <span class="ce-label">Location</span>
+              <span class="ce-val">Riverside, California</span>
+              <span class="ce-sub">33.9806° N, 117.3755° W</span>
+            </div>
+            <span class="ce-arrow" style="opacity:0.3">–</span>
+          </div>
+
+        </div>
+
+        <!-- right: business card + future space -->
+        <div class="contact-right">
+
+          <div>
+            <div class="card-section-label">// Business Card · hover to flip</div>
+            <div class="biz-card-wrapper">
+              <div class="biz-card">
+                <!-- front -->
+                <div class="bc-face bc-front">
+                  <div class="bc-strip">
+                    <div class="bc-strip-r"></div>
+                    <div class="bc-strip-o"></div>
+                    <div class="bc-strip-y"></div>
+                    <div class="bc-strip-w"></div>
+                  </div>
+                  <div class="bc-name">Your Name</div>
+                  <div class="bc-role">Software Engineer · Full-Stack</div>
+                  <div class="bc-contact-line">
+                    <span>ML</span>&nbsp;you@email.com<br>
+                    <span>GH</span>&nbsp;github.com/yourhandle<br>
+                    <span>📍</span>&nbsp;Riverside, CA
+                  </div>
+                </div>
+                <!-- back -->
+                <div class="bc-face bc-back">
+                  <div class="bc-back-logo">YN</div>
+                  <div class="bc-back-url">yourportfolio.com</div>
+                  <div class="bc-placeholder-text" style="margin-top:6px">Add QR code or<br>custom design here</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- future space -->
+          <div>
+            <div class="card-section-label">// Reserved · future use</div>
+            <div class="future-space">
+              <div class="future-icon">🎴</div>
+              <div class="future-label">Space reserved for<br>physical business card<br>design or additional contact</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- copied toast -->
+    <div class="copied-toast" id="toast">Copied to clipboard</div>
+
+    <div class="color-bar bottom">
+      <div class="cs cs-red"></div><div class="cs cs-orange"></div>
+      <div class="cs cs-yellow"></div><div class="cs cs-white"></div>
+      <div class="cs cs-hatch"></div>
+    </div>
+    <footer class="bottom-bar">
+      <div class="bb-left">YOUR-NAME<br>CONTACT</div>
+      <div class="bb-center">RIVERSIDE, CA · OPEN TO WORK</div>
+      <div class="bb-right">33.9806°N<br>117.3755°W</div>
+    </footer>
+  </div>
+
+  <script src="nav.js"></script>
+  <script>
+    function copyVal(val) {
+      navigator.clipboard.writeText(val).catch(() => {});
+      showToast();
+    }
+    function copyAndOpen(e, val) {
+      navigator.clipboard.writeText(val).catch(() => {});
+      // allow href to proceed
+    }
+    function showToast() {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1800);
+    }
+  </script>
+</body>
+</html>
