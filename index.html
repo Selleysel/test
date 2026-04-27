@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Name — Portfolio</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Extra styles specific to the home page ── */
+
+    /* The four access cards sit in a scrollable column */
+    .cards-area {
+      padding: 18px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      overflow-y: auto;
+    }
+    .cards-hdr {
+      font-family: var(--mono); font-size: 8.5px;
+      letter-spacing: 0.2em; color: var(--ink-light);
+      text-transform: uppercase; margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+<div class="site">
+
+  <!-- Background grid lines & registration marks -->
+  <div class="gov">
+    <div class="gl gl-h" style="top:33%"></div>
+    <div class="gl gl-h" style="top:66%"></div>
+    <div class="gl gl-v" style="left:33%"></div>
+    <div class="gl gl-v" style="left:66%"></div>
+    <div class="xhair" style="top:50%;left:50%"></div>
+    <div class="reg" style="top:0;left:0"></div>
+    <div class="reg" style="top:0;right:0"></div>
+  </div>
+
+  <!-- ── Topbar ── -->
+  <header class="topbar">
+    <div class="tb-l">
+      <span id="tb-page">YOUR-NAME</span>
+      <span>PORTFOLIO</span>
+      <span>INDEX</span>
+    </div>
+    <div class="tb-r">
+      <span class="sdot"></span>
+      <span>OPEN TO WORK · 2025</span>
+    </div>
+  </header>
+
+  <!-- Top color stripe -->
+  <div class="cbar">
+    <div class="cs cs-r"></div><div class="cs cs-o"></div>
+    <div class="cs cs-y"></div><div class="cs cs-w"></div>
+    <div class="cs cs-h"></div>
+  </div>
+
+  <!-- ── Main content ── -->
+  <div class="content">
+    <div class="page-wrapper" style="height:100%;display:grid;grid-template-columns:200px 1fr">
+
+      <!-- LEFT SIDEBAR — hidden on mobile -->
+      <aside class="home-sb">
+        <div class="sb-ey">> init()</div>
+        <div class="sb-nm">Your<br>Name</div><!-- ← CHANGE: your name -->
+        <div class="sb-role">Full-Stack Engineer<br>Systems · Open Source</div><!-- ← CHANGE: your role -->
+        <hr class="sb-div">
+        <div class="sb-block">
+          <span class="sb-lbl">Location</span>
+          <span class="sb-val">Riverside, CA</span>
+        </div>
+        <div class="sb-block">
+          <span class="sb-lbl">Stack</span>
+          <span class="sb-val">TypeScript · React<br>Go · Rust</span><!-- ← CHANGE: your stack -->
+        </div>
+        <div class="sb-block">
+          <span class="sb-lbl">Status</span>
+          <div class="sbadge"><span class="sdot"></span>Available</div>
+        </div>
+        <hr class="sb-div" style="margin-top:auto">
+        <div class="sb-lbl">BUILD 001 · REV 2025</div>
+      </aside>
+
+      <!-- RIGHT — Access Cards (navigation) -->
+      <div class="cards-area">
+
+        <!-- Mobile-only slim header (replaces sidebar on small screens) -->
+        <div class="mob-header">
+          <span class="sdot"></span>
+          <span>YOUR NAME · SOFTWARE ENGINEER · RIVERSIDE, CA</span><!-- ← CHANGE -->
+        </div>
+
+        <div class="cards-hdr">// ACCESS REQUIRED — SELECT DESTINATION</div>
+
+        <!-- ══ ACCESS CARD: PROJECTS ══
+             ac-prj = red left accent (see style.css .ac-prj::before) -->
+        <div class="ac ac-prj" onclick="navigateTo('projects.html')" role="button" tabindex="0">
+          <div class="ac-notch"></div>          <!-- card slot notch at top -->
+          <div class="ac-fp" id="fp1"></div>    <!-- fingerprint dots (filled by JS) -->
+
+          <!-- Top light section: destination name + category badge -->
+          <div class="ac-top">
+            <div>
+              <div class="ac-dest">Projects</div>
+              <div class="ac-subdest">Floppy disk archive · shipped work</div>
+            </div>
+            <div class="ac-badge">PRJ-01</div>
+          </div>
+
+          <!-- Middle dark section: name + chip -->
+          <div class="ac-mid">
+            <div>
+              <div class="ac-name">Your Name</div><!-- ← CHANGE -->
+              <div class="ac-role">Software Engineer · Full-Stack</div><!-- ← CHANGE -->
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+              <div class="ac-chip"></div>
+              <div class="ac-ce">CE ZG·716</div>
+            </div>
+          </div>
+
+          <!-- Bottom: serial number + barcode (barcode filled by JS) -->
+          <div class="ac-bot">
+            <div class="ac-serial">
+              ID: CN/YN·2025·0001<br><!-- ← CHANGE: your initials -->
+              CLEARANCE: FULL ACCESS
+            </div>
+            <div class="ac-bars" id="bars1"></div>
+          </div>
+        </div>
+
+        <!-- ══ ACCESS CARD: PROFILE ══
+             ac-pro = purple left accent -->
+        <div class="ac ac-pro" onclick="navigateTo('profile.html')" role="button" tabindex="0">
+          <div class="ac-notch"></div>
+          <div class="ac-fp" id="fp2"></div>
+          <div class="ac-top">
+            <div>
+              <div class="ac-dest">Profile</div>
+              <div class="ac-subdest">About · Skill tree · Micro blog</div>
+            </div>
+            <div class="ac-badge">PRF-02</div>
+          </div>
+          <div class="ac-mid">
+            <div>
+              <div class="ac-name">Your Name</div><!-- ← CHANGE -->
+              <div class="ac-role">Software Engineer · UCR</div><!-- ← CHANGE -->
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+              <div class="ac-chip"></div>
+              <div class="ac-ce">CE ZG·716</div>
+            </div>
+          </div>
+          <div class="ac-bot">
+            <div class="ac-serial">ID: CN/YN·2025·0002<br>CLEARANCE: FULL ACCESS</div>
+            <div class="ac-bars" id="bars2"></div>
+          </div>
+        </div>
+
+        <!-- ══ ACCESS CARD: RÉSUMÉ ══
+             ac-res = amber left accent -->
+        <div class="ac ac-res" onclick="navigateTo('resume.html')" role="button" tabindex="0">
+          <div class="ac-notch"></div>
+          <div class="ac-fp" id="fp3"></div>
+          <div class="ac-top">
+            <div>
+              <div class="ac-dest">Résumé</div>
+              <div class="ac-subdest">Experience · Education · Skills</div>
+            </div>
+            <div class="ac-badge">RES-03</div>
+          </div>
+          <div class="ac-mid">
+            <div>
+              <div class="ac-name">Your Name</div><!-- ← CHANGE -->
+              <div class="ac-role">Software Engineer · Full-Stack</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+              <div class="ac-chip"></div>
+              <div class="ac-ce">CE ZG·716</div>
+            </div>
+          </div>
+          <div class="ac-bot">
+            <div class="ac-serial">ID: CN/YN·2025·0003<br>CLEARANCE: FULL ACCESS</div>
+            <div class="ac-bars" id="bars3"></div>
+          </div>
+        </div>
+
+        <!-- ══ ACCESS CARD: CONTACT ══
+             ac-con = blue left accent -->
+        <div class="ac ac-con" onclick="navigateTo('contact.html')" role="button" tabindex="0">
+          <div class="ac-notch"></div>
+          <div class="ac-fp" id="fp4"></div>
+          <div class="ac-top">
+            <div>
+              <div class="ac-dest">Contact</div>
+              <div class="ac-subdest">Email · LinkedIn · Discord</div>
+            </div>
+            <div class="ac-badge">CTX-04</div>
+          </div>
+          <div class="ac-mid">
+            <div>
+              <div class="ac-name">Your Name</div><!-- ← CHANGE -->
+              <div class="ac-role">Software Engineer · Riverside, CA</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+              <div class="ac-chip"></div>
+              <div class="ac-ce">CE ZG·716</div>
+            </div>
+          </div>
+          <div class="ac-bot">
+            <div class="ac-serial">ID: CN/YN·2025·0004<br>CLEARANCE: FULL ACCESS</div>
+            <div class="ac-bars" id="bars4"></div>
+          </div>
+        </div>
+
+      </div><!-- end cards-area -->
+    </div><!-- end page-wrapper -->
+  </div><!-- end content -->
+
+  <!-- Bottom color stripe -->
+  <div class="cbar">
+    <div class="cs cs-r"></div><div class="cs cs-o"></div>
+    <div class="cs cs-y"></div><div class="cs cs-w"></div>
+    <div class="cs cs-h"></div>
+  </div>
+
+  <!-- ── Bottom bar ── -->
+  <footer class="bbar">
+    <div class="bb-l">YOUR-NAME<br>PORTFOLIO 2025</div><!-- ← CHANGE -->
+    <div class="bb-c">YOUR NAME · SOFTWARE ENGINEER</div><!-- ← CHANGE -->
+    <div class="bb-r">FULL-STACK<br>OPEN SOURCE</div>
+  </footer>
+
+</div><!-- end site -->
+
+<script src="nav.js"></script>
+<script>
+  // Generate barcodes and fingerprint dots for all four access cards
+  // makeBars(elementId, seed) — seed changes the bar pattern per card
+  makeBars('bars1', 1);
+  makeBars('bars2', 2);
+  makeBars('bars3', 3);
+  makeBars('bars4', 4);
+  makeFP('fp1'); makeFP('fp2'); makeFP('fp3'); makeFP('fp4');
+
+  // Keyboard accessibility — Enter/Space triggers card navigation
+  document.querySelectorAll('.ac[role="button"]').forEach(card => {
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') card.click();
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — Your Name</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+    /* ── Page layout: tab bar on top, panel below ── */
+    .profile-layout {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100%;
+    }
+    .panel-wrap { overflow: hidden; position: relative; }
+    .panel {
+      display: none; height: 100%;
+      overflow-y: auto; padding: 20px 24px;
+    }
+    .panel.on { display: block; animation: fup 0.25s ease forwards; }
+
+    /* ══════════════════════════════
+       ABOUT PANEL
+    ══════════════════════════════ */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 24px;
+    }
+    .about-photo {
+      width: 140px; height: 175px;
+      background: #0e0e10;
+      border: 0.5px solid rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 4px; flex-shrink: 0;
+    }
+    .ap-ph { font-family: var(--mono); font-size: 7.5px; letter-spacing: 0.1em; color: #555; text-transform: uppercase; text-align: center; }
+    .about-main { display: flex; flex-direction: column; gap: 12px; }
+    .about-name { font-family: var(--cond); font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 900; text-transform: uppercase; line-height: 0.93; }
+    .about-role { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--ink-mid); text-transform: uppercase; }
+    .about-bio  { font-size: 12.5px; color: #444; line-height: 1.7; font-weight: 300; max-width: 500px; }
+    .about-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .alink {
+      font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em;
+      padding: 4px 10px; border: 0.5px solid rgba(0,0,0,0.28);
+      color: var(--ink); text-transform: uppercase; cursor: pointer;
+      transition: background 0.15s; text-decoration: none;
+    }
+    .alink:hover { background: var(--ink); color: var(--paper); }
+    .about-div { border: none; border-top: 0.5px solid rgba(0,0,0,0.14); }
+    /* Quick-stat grid below the bio */
+    .about-specs { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+    .aspec { border: 0.5px solid rgba(0,0,0,0.14); padding: 8px 10px; background: var(--paper); }
+    .aspec-lbl { font-family: var(--mono); font-size: 7px; letter-spacing: 0.15em; color: var(--ink-light); text-transform: uppercase; margin-bottom: 3px; }
+    .aspec-val { font-size: 11.5px; font-weight: 500; }
+
+    /* ══════════════════════════════
+       SKILL TREE PANEL
+       Tree is drawn as an SVG by JS.
+       Nodes: mastered (black), learning (red), planned (outlined)
+    ══════════════════════════════ */
+    #panel-skills { padding: 16px 20px; }
+    .tree-wrap { overflow: auto; }
+    .tree-svg { display: block; width: 100%; max-width: 700px; }
+    .tree-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 8px; letter-spacing: 0.1em; color: var(--ink-light); text-transform: uppercase; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ══════════════════════════════
+       BLOG PANEL
+       Posts loaded from Google Sheets via gviz JSON.
+       Filtered by tag category and free-text search.
+    ══════════════════════════════ */
+    .blog-toolbar {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      align-items: center; margin-bottom: 14px;
+    }
+    .blog-search {
+      font-family: var(--mono); font-size: 10px;
+      padding: 5px 10px;
+      border: 0.5px solid rgba(0,0,0,0.28);
+      background: transparent; color: var(--ink);
+      letter-spacing: 0.06em; outline: none; width: 170px;
+    }
+    .blog-search:focus { border-color: rgba(0,0,0,0.5); }
+    .tag-filters { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    /* Category filter pills */
+    .tfilter {
+      font-family: var(--mono); font-size: 8px; letter-spacing: 0.08em;
+      padding: 3px 9px;
+      border: 0.5px solid rgba(0,0,0,0.22);
+      background: transparent; color: var(--ink-light);
+      text-transform: uppercase; cursor: pointer; transition: all 0.15s;
+    }
+    .tfilter:hover { border-color: rgba(0,0,0,0.5); color: var(--ink); }
+    .tfilter.on    { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    /* Date range inputs */
+    .date-filter { display: flex; gap: 6px; align-items: center; }
+    .date-input {
+      font-family: var(--mono); font-size: 9px; padding: 4px 8px;
+      border: 0.5px solid rgba(0,0,0,0.22); background: transparent;
+      color: var(--ink); outline: none; width: 120px;
+    }
+    .date-sep { font-family: var(--mono); font-size: 8px; color: var(--ink-light); }
+
+    /* Loading + empty states */
+    .blog-status {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+      color: var(--ink-light); text-transform: uppercase;
+      padding: 24px 0; text-align: center; opacity: 0.6;
+    }
+
+    /* Post card */
+    .blog-grid { display: flex; flex-direction: column; gap: 10px; }
+    .blog-post {
+      border: 0.5px solid rgba(0,0,0,0.16);
+      background: var(--paper); padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 7px;
+      transition: border-color 0.15s;
+    }
+    .blog-post:hover { border-color: rgba(0,0,0,0.38); }
+
+    .bp-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .bp-date { font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em; color: var(--ink-light); text-transform: uppercase; }
+    .bp-project { font-family: var(--mono); font-size: 8px; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
+    .bp-tags { display: flex; gap: 3px; flex-wrap: wrap; }
+
+    /* Tag colors — map to the 5 categories */
+    .bptag { font-family: var(--mono); font-size: 7.5px; letter-spacing: 0.06em; padding: 1px 6px; border: 0.5px solid rgba(0,0,0,0.18); text-transform: uppercase; }
+    .bptag-skills   { border-color: rgba(0,200,120,0.5); color: #006a3a; }
+    .bptag-topics   { border-color: rgba(74,144,217,0.5); color: #1a5a9a; }
+    .bptag-status   { border-color: rgba(240,184,0,0.5);  color: #7a5a00; }
+    .bptag-projects { border-color: rgba(232,50,10,0.5);  color: #a02000; }
+    .bptag-others   { border-color: rgba(155,89,208,0.5); color: #6a2aa0; }
+
+    .bp-title { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.3; }
+    .bp-body  { font-size: 12px; color: #555; line-height: 1.65; font-weight: 300; }
+  </style>
+</head>
+<body>
+<div class="site">
+
+  <div class="gov">
+    <div class="gl gl-h" style="top:50%"></div>
+    <div class="gl gl-v" style="left:50%"></div>
+    <div class="xhair" style="top:50%;left:50%"></div>
+    <div class="reg" style="top:0;left:0"></div>
+    <div class="reg" style="top:0;right:0"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="tb-l">
+      <button class="back-btn" onclick="navigateTo('index.html')">← HOME</button>
+      <span>PROFILE</span>
+      <span>ABOUT · SKILLS · BLOG</span>
+    </div>
+    <div class="tb-r">
+      <span class="sdot"></span>
+      <span>UCR · CLASS OF 2026</span>
+    </div>
+  </header>
+
+  <div class="cbar"><div class="cs cs-r"></div><div class="cs cs-o"></div><div class="cs cs-y"></div><div class="cs cs-w"></div><div class="cs cs-h"></div></div>
+
+  <div class="content">
+    <div class="page-wrapper" style="height:100%">
+      <div class="profile-layout">
+
+        <!-- ── Tab bar ── -->
+        <div class="tab-bar">
+          <div class="atab on"  data-panel="panel-about"><span class="tab-dot"></span>About</div>
+          <div class="atab"     data-panel="panel-skills"><span class="tab-dot"></span>Skill Tree</div>
+          <div class="atab"     data-panel="panel-blog"><span class="tab-dot"></span>Micro Blog</div>
+        </div>
+
+        <!-- ── Tab panels ── -->
+        <div class="panel-wrap">
+
+          <!-- ════ ABOUT ════ -->
+          <div class="panel on" id="panel-about">
+            <div class="about-grid">
+
+              <!-- Photo placeholder — swap src for a real image when ready -->
+              <div>
+                <div class="about-photo">
+                  <div style="font-size:2rem;opacity:0.15">👤</div>
+                  <div class="ap-ph">Photo<br>Placeholder</div>
+                </div>
+              </div>
+
+              <div class="about-main">
+                <div class="about-name">Your<br>Name</div><!-- ← CHANGE -->
+                <div class="about-role">B.S. Computer Science · UC Riverside · Class of 2026</div><!-- ← CHANGE -->
+
+                <!--
+                  ← CHANGE: Write your bio here.
+                  Tip: 2–3 sentences. What you build, your focus, what you're after.
+                -->
+                <p class="about-bio">
+                  Software engineer passionate about building fast, reliable systems and interfaces.
+                  I work across the stack — from React frontends to Go backends — with a focus on clean
+                  abstractions and developer experience. Currently open to internships and full-time opportunities.
+                </p>
+
+                <!-- ← CHANGE: Update these link hrefs -->
+                <div class="about-links">
+                  <a class="alink" href="https://github.com/yourhandle" target="_blank">GitHub ↗</a>
+                  <a class="alink" href="https://linkedin.com/in/yourname" target="_blank">LinkedIn ↗</a>
+                  <a class="alink" href="resume.html" onclick="navigateTo('resume.html');return false">Resume ↓</a>
+                </div>
+
+                <hr class="about-div">
+
+                <!-- Quick stats — ← CHANGE values below -->
+                <div class="about-specs">
+                  <div class="aspec"><div class="aspec-lbl">University</div><div class="aspec-val">UC Riverside</div></div>
+                  <div class="aspec"><div class="aspec-lbl">Major</div><div class="aspec-val">Computer Science</div></div>
+                  <div class="aspec"><div class="aspec-lbl">Grad</div><div class="aspec-val">May 2026</div></div>
+                  <div class="aspec"><div class="aspec-lbl">Location</div><div class="aspec-val">Riverside, CA</div></div>
+                  <div class="aspec"><div class="aspec-lbl">Focus</div><div class="aspec-val">Full-Stack</div></div>
+                  <div class="aspec"><div class="aspec-lbl">Status</div><div class="aspec-val" style="color:#006a3a">Available ●</div></div>
+                </div>
+              </div>
+            </div>
+          </div><!-- end ABOUT panel -->
+
+          <!-- ════ SKILL TREE ════
+               The SVG is drawn entirely by drawTree() below.
+               To add/edit skills: modify the SKILL_NODES array in the <script>.
+               status options: 'mastered' | 'learning' | 'planned'
+          ════ -->
+          <div class="panel" id="panel-skills">
+            <svg class="tree-svg" id="treeSvg" viewBox="0 0 700 430" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="tree-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#0e0e10"></div>Mastered</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Learning</div>
+              <div class="legend-item"><div class="legend-dot" style="border:1.5px solid rgba(0,0,0,0.35)"></div>Planned</div>
+            </div>
+          </div>
+
+          <!-- ════ MICRO BLOG ════
+               Posts are fetched live from your Google Sheet.
+               Searchable by text and filterable by tag category + date range.
+          ════ -->
+          <div class="panel" id="panel-blog">
+            <div class="blog-toolbar">
+              <!-- Free-text search -->
+              <input class="blog-search" id="blogSearch" type="text" placeholder="Search posts...">
+
+              <!-- Category tag filters — map to your 5 tag categories -->
+              <div class="tag-filters">
+                <div class="tfilter on" data-cat="all">All</div>
+                <div class="tfilter" data-cat="Skills">Skills</div>
+                <div class="tfilter" data-cat="Topics">Topics</div>
+                <div class="tfilter" data-cat="Status">Status</div>
+                <div class="tfilter" data-cat="Projects">Projects</div>
+                <div class="tfilter" data-cat="Others">Others</div>
+              </div>
+
+              <!-- Date range filter -->
+              <div class="date-filter">
+                <input class="date-input" id="dateFrom" type="date" title="From date">
+                <span class="date-sep">→</span>
+                <input class="date-input" id="dateTo"   type="date" title="To date">
+              </div>
+            </div>
+
+            <!-- Posts are injected here by renderBlog() -->
+            <div id="blogContainer">
+              <div class="blog-status">// Fetching posts from Google Sheets...</div>
+            </div>
+          </div><!-- end BLOG panel -->
+
+        </div><!-- end panel-wrap -->
+      </div><!-- end profile-layout -->
+    </div><!-- end page-wrapper -->
+  </div><!-- end content -->
+
+  <div class="cbar"><div class="cs cs-r"></div><div class="cs cs-o"></div><div class="cs cs-y"></div><div class="cs cs-w"></div><div class="cs cs-h"></div></div>
+
+  <footer class="bbar">
+    <div class="bb-l">YOUR-NAME<br>PROFILE</div><!-- ← CHANGE -->
+    <div class="bb-c">ABOUT · SKILL TREE · MICRO BLOG</div>
+    <div class="bb-r">UCR<br>2026</div>
+  </footer>
+</div>
+
+<script src="nav.js"></script>
+<script>
+/* ============================================================
+   SKILL TREE
+   ── To add a skill: add an entry to SKILL_NODES.
+   ── id:     unique string (no spaces)
+   ── label:  display text (\n for line break)
+   ── x/y:    position on the 700×430 SVG canvas
+   ── r:      radius of the node circle
+   ── status: 'mastered' | 'learning' | 'planned'
+   ── parent: id of the parent node (null for root)
+   ============================================================ */
+const SKILL_NODES = [
+  // ── Root
+  { id:'root',   label:'Software\nEngineer', x:350, y:32,  r:30, status:'mastered', parent:null },
+
+  // ── Tier 1 branches
+  { id:'langs',  label:'Languages',  x:110, y:110, r:22, status:'mastered', parent:'root' },
+  { id:'fe',     label:'Frontend',   x:350, y:110, r:22, status:'mastered', parent:'root' },
+  { id:'be',     label:'Backend',    x:590, y:110, r:22, status:'mastered', parent:'root' },
+
+  // ── Languages branch
+  { id:'ts',     label:'TypeScript', x:55,  y:205, r:18, status:'mastered', parent:'langs' },
+  { id:'go',     label:'Go',         x:160, y:205, r:18, status:'learning', parent:'langs' },
+  { id:'rust',   label:'Rust',       x:55,  y:295, r:18, status:'learning', parent:'ts'    },
+  { id:'py',     label:'Python',     x:160, y:295, r:18, status:'mastered', parent:'go'    },
+  { id:'wasm',   label:'WASM',       x:55,  y:385, r:15, status:'planned',  parent:'rust'  },
+
+  // ── Frontend branch
+  { id:'react',    label:'React',    x:280, y:205, r:18, status:'mastered', parent:'fe' },
+  { id:'next',     label:'Next.js',  x:390, y:205, r:18, status:'mastered', parent:'fe' },
+  { id:'tailwind', label:'Tailwind', x:260, y:295, r:16, status:'mastered', parent:'react' },
+  { id:'svelte',   label:'Svelte',   x:380, y:295, r:16, status:'planned',  parent:'next'  },
+  { id:'threejs',  label:'Three.js', x:320, y:385, r:15, status:'planned',  parent:'svelte'},
+
+  // ── Backend branch
+  { id:'node',     label:'Node.js',   x:530, y:205, r:18, status:'mastered', parent:'be' },
+  { id:'postgres', label:'PostgreSQL',x:640, y:205, r:18, status:'mastered', parent:'be' },
+  { id:'docker',   label:'Docker',    x:510, y:295, r:16, status:'learning', parent:'node'     },
+  { id:'k8s',      label:'K8s',       x:640, y:295, r:16, status:'planned',  parent:'postgres' },
+  { id:'graphql',  label:'GraphQL',   x:580, y:385, r:15, status:'planned',  parent:'node'     },
+];
+
+const STATUS_FILL   = { mastered:'#0e0e10', learning:'#e8320a', planned:'transparent' };
+const STATUS_STROKE = { mastered:'#0e0e10', learning:'#e8320a', planned:'rgba(0,0,0,0.32)' };
+const STATUS_TEXT   = { mastered:'#eae6dc', learning:'#fff',    planned:'#666' };
+
+function drawTree() {
+  const svg = document.getElementById('treeSvg');
+  if (!svg) return;
+  svg.innerHTML = '';
+
+  const nodeMap = {};
+  SKILL_NODES.forEach(n => nodeMap[n.id] = n);
+
+  // Draw connecting lines first (behind nodes)
+  SKILL_NODES.forEach(n => {
+    if (!n.parent) return;
+    const p = nodeMap[n.parent];
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', p.x); line.setAttribute('y1', p.y);
+    line.setAttribute('x2', n.x); line.setAttribute('y2', n.y);
+    line.setAttribute('stroke', 'rgba(0,0,0,0.16)');
+    line.setAttribute('stroke-width', '1');
+    // Dashed lines for planned nodes
+    if (n.status === 'planned') line.setAttribute('stroke-dasharray', '4,3');
+    svg.appendChild(line);
+  });
+
+  // Draw nodes on top of lines
+  SKILL_NODES.forEach(n => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); circle.setAttribute('r', n.r);
+    circle.setAttribute('fill',         STATUS_FILL[n.status]);
+    circle.setAttribute('stroke',       STATUS_STROKE[n.status]);
+    circle.setAttribute('stroke-width', '1.5');
+    g.appendChild(circle);
+
+    // Multi-line label
+    const lines = n.label.split('\n');
+    lines.forEach((line, i) => {
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', n.x);
+      t.setAttribute('y', n.y + (i - (lines.length - 1) / 2) * 11 + 1);
+      t.setAttribute('text-anchor',      'middle');
+      t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('fill',             STATUS_TEXT[n.status]);
+      t.setAttribute('font-family',      "'Share Tech Mono',monospace");
+      t.setAttribute('font-size',        n.r > 20 ? '8' : '7');
+      t.setAttribute('letter-spacing',   '0.05em');
+      t.textContent = line;
+      g.appendChild(t);
+    });
+
+    svg.appendChild(g);
+  });
+}
+
+/* ============================================================
+   GOOGLE SHEETS BLOG
+   ── Sheet structure (row 1 = headers):
+      A: date       e.g. 2025-04-20
+      B: title      Post title
+      C: body       Post content
+      D: tags       Comma-separated: Skills, React, Learning
+      E: status     "published" or "draft"
+      F: project    (optional) related project name
+
+   ── To publish a post: set status = "published"
+   ── To hide a post:    set status = "draft"
+   ── The blog auto-refreshes each time you open the tab.
+   ============================================================ */
+const SHEET_ID  = '1Hn33_VGoQVWu_yMvSwzpR9dTxyMIrxEV9mYzqXVGDBU'; // ← your sheet ID
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+
+// Maps tag text to CSS class suffix
+const CAT_CLASS = {
+  skills:'skills', topics:'topics', status:'status',
+  projects:'projects', others:'others'
+};
+
+let allPosts  = [];
+let blogReady = false;
+
+// Called when the blog tab is opened
+async function initBlog() {
+  if (blogReady) { renderBlog(); return; }
+  try {
+    const res  = await fetch(SHEET_URL);
+    const text = await res.text();
+    // Google wraps the JSON in a callback — strip it
+    const json = JSON.parse(text.replace(/^.*?({.*})\s*\)*;?\s*$/s, '$1'));
+
+    const cols = json.table.cols.map(c => c.label.toLowerCase().trim());
+    allPosts = json.table.rows
+      .map(r => {
+        const obj = {};
+        cols.forEach((col, i) => {
+          obj[col] = (r.c && r.c[i] && r.c[i].v != null) ? String(r.c[i].v) : '';
+        });
+        return obj;
+      })
+      .filter(p => p.status && p.status.toLowerCase() === 'published' && p.title);
+
+    blogReady = true;
+    renderBlog();
+  } catch (err) {
+    document.getElementById('blogContainer').innerHTML = `
+      <div class="blog-status">
+        // Could not load posts.<br>
+        Make sure your sheet is public (File → Share → Anyone with the link → Viewer)<br>
+        and row 1 has headers: date, title, body, tags, status, project
+      </div>`;
+  }
+}
+
+// Active filter state
+let activeCat  = 'all';
+let searchText = '';
+let dateFrom   = '';
+let dateTo     = '';
+
+function renderBlog() {
+  let posts = allPosts;
+
+  // Filter by category tag
+  if (activeCat !== 'all') {
+    posts = posts.filter(p => {
+      const tags = (p.tags || '').split(',').map(t => t.trim().toLowerCase());
+      return tags.includes(activeCat.toLowerCase());
+    });
+  }
+
+  // Filter by search text (title + body + tags)
+  if (searchText) {
+    const q = searchText.toLowerCase();
+    posts = posts.filter(p =>
+      (p.title + p.body + p.tags).toLowerCase().includes(q)
+    );
+  }
+
+  // Filter by date range
+  if (dateFrom) posts = posts.filter(p => p.date && p.date >= dateFrom);
+  if (dateTo)   posts = posts.filter(p => p.date && p.date <= dateTo);
+
+  const container = document.getElementById('blogContainer');
+
+  if (posts.length === 0) {
+    container.innerHTML = '<div class="blog-status">// No posts match.</div>';
+    return;
+  }
+
+  container.innerHTML = `<div class="blog-grid">${posts.map(p => {
+    const tags = (p.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+    const tagHtml = tags.map(t => {
+      const cls = CAT_CLASS[t.toLowerCase()] || 'others';
+      return `<span class="bptag bptag-${cls}">${t}</span>`;
+    }).join('');
+
+    return `<div class="blog-post">
+      <div class="bp-meta">
+        <span class="bp-date">${p.date || ''}</span>
+        ${p.project ? `<span class="bp-project">${p.project}</span>` : ''}
+        <div class="bp-tags">${tagHtml}</div>
+      </div>
+      <div class="bp-title">${p.title}</div>
+      <div class="bp-body">${p.body || ''}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── Wire up filters ──
+
+document.getElementById('blogSearch').addEventListener('input', e => {
+  searchText = e.target.value; renderBlog();
+});
+
+document.querySelectorAll('.tfilter').forEach(f => {
+  f.addEventListener('click', () => {
+    document.querySelectorAll('.tfilter').forEach(x => x.classList.remove('on'));
+    f.classList.add('on');
+    activeCat = f.dataset.cat;
+    renderBlog();
+  });
+});
+
+document.getElementById('dateFrom').addEventListener('change', e => { dateFrom = e.target.value; renderBlog(); });
+document.getElementById('dateTo').addEventListener('change',   e => { dateTo   = e.target.value; renderBlog(); });
+
+/* ── Tab switching ── */
+document.querySelectorAll('.atab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.atab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+    tab.classList.add('on');
+    const panel = document.getElementById(tab.dataset.panel);
+    if (panel) panel.classList.add('on');
+    // Lazy-load skill tree and blog only when first opened
+    if (tab.dataset.panel === 'panel-skills') drawTree();
+    if (tab.dataset.panel === 'panel-blog')   initBlog();
+  });
+});
+</script>
+</body>
+</html>
