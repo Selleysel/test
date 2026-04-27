@@ -6,427 +6,208 @@
   <title>Projects — Your Name</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .projects-layout {
+    .proj-layout {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr 310px; /* shelf | detail panel */
       height: 100%;
     }
 
-    /* ── disk shelf ── */
-    .disk-shelf {
-      padding: 24px 28px;
-      overflow-y: auto;
-      border-right: 0.5px solid rgba(0,0,0,0.18);
-    }
-    .disk-shelf::-webkit-scrollbar { width: 4px; }
-    .disk-shelf::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); }
+    /* ── Disk shelf (left side) ── */
+    .disk-shelf { padding: 18px 22px; overflow-y: auto; border-right: .5px solid rgba(0,0,0,.15); }
+    .shelf-hdr  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .shelf-title { font-family: var(--cond); font-size: 1.7rem; font-weight: 900; text-transform: uppercase; line-height: .95; }
+    .shelf-meta  { font-family: var(--mono); font-size: 8.5px; letter-spacing: .12em; color: var(--ink-light); text-transform: uppercase; text-align: right; line-height: 1.6; }
+    .disk-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 12px; }
 
-    .shelf-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .shelf-title {
-      font-family: var(--condensed);
-      font-size: 2rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-    .shelf-meta {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.12em;
-      color: var(--ink-light);
-      text-transform: uppercase;
-      text-align: right;
-      line-height: 1.6;
-    }
+    /* ── Detail panel (right side) ── */
+    .det-panel  { padding: 18px 16px; display: flex; flex-direction: column; overflow-y: auto; }
+    .det-empty  { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; gap: 8px; opacity: .3; }
+    .det-empty-ico { font-size: 2rem; }
+    .det-empty-txt { font-family: var(--mono); font-size: 8.5px; letter-spacing: .15em; text-transform: uppercase; text-align: center; }
 
-    .disk-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 16px;
-    }
+    /* Detail content — hidden until a disk is clicked */
+    .det     { display: none; flex-direction: column; gap: 11px; }
+    .det.vis { display: flex; animation: fup .25s ease forwards; }
 
-    /* ── floppy disk ── */
-    .floppy {
-      cursor: pointer;
-      transition: transform 0.2s, filter 0.2s;
-      user-select: none;
-    }
-    .floppy:hover { transform: translateY(-4px) rotate(-1deg); }
-    .floppy.active .disk-body { outline: 2px solid var(--accent); }
-
-    .disk-body {
-      width: 100%;
-      aspect-ratio: 1 / 1.1;
-      background: var(--ink);
-      border-radius: 3px 3px 6px 6px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-
-    /* color variants */
-    .floppy.col-red  .disk-body { background: #1a0a0a; border-top: 4px solid var(--accent); }
-    .floppy.col-amber .disk-body { background: #1a1200; border-top: 4px solid var(--accent2); }
-    .floppy.col-blue .disk-body { background: #0a0e1a; border-top: 4px solid #4a90d9; }
-    .floppy.col-green .disk-body { background: #001a0f; border-top: 4px solid #00c87a; }
-    .floppy.col-purple .disk-body { background: #10091a; border-top: 4px solid #9b59d0; }
-
-    .disk-shutter {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 38%; height: 14%;
-      background: #888;
-      border-radius: 1px;
-    }
-    .disk-shutter::before {
-      content: '';
-      position: absolute;
-      top: 20%; left: 18%; right: 18%; bottom: 20%;
-      background: #333;
-    }
-
-    .disk-label-area {
-      position: absolute;
-      bottom: 6px; left: 6px; right: 6px;
-      height: 35%;
-      background: var(--paper);
-      border-radius: 1px;
-      padding: 4px 5px;
-      display: flex; flex-direction: column; gap: 2px;
-    }
-    .disk-label-line {
-      height: 1px;
-      background: rgba(0,0,0,0.15);
-    }
-    .disk-label-title {
-      font-family: var(--mono);
-      font-size: 7px;
-      color: var(--ink);
-      letter-spacing: 0.05em;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      font-weight: 700;
-    }
-    .disk-label-sub {
-      font-family: var(--mono);
-      font-size: 6.5px;
-      color: var(--ink-light);
-      letter-spacing: 0.04em;
-    }
-    .disk-notch {
-      position: absolute;
-      top: 0; left: 12px;
-      width: 18px; height: 4px;
-      background: #444;
-      border-radius: 0 0 2px 2px;
-    }
-
-    .floppy-name {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.08em;
-      color: var(--ink-mid);
-      text-align: center;
-      margin-top: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-transform: uppercase;
-    }
-
-    /* ── detail panel ── */
-    .detail-panel {
-      padding: 24px 22px;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-    .detail-panel::-webkit-scrollbar { width: 4px; }
-    .detail-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
-
-    .detail-empty {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      gap: 12px;
-      opacity: 0.35;
-    }
-    .detail-empty-icon {
-      font-size: 3rem;
-      filter: grayscale(1);
-    }
-    .detail-empty-text {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      color: var(--ink);
-      text-transform: uppercase;
-      text-align: center;
-    }
-
-    .detail-content { display: none; flex-direction: column; gap: 16px; }
-    .detail-content.visible { display: flex; animation: fadeUp 0.3s ease forwards; }
-
-    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-
-    .detail-num {
-      font-family: var(--mono); font-size: 9px;
-      letter-spacing: 0.2em; color: var(--ink-light);
-      text-transform: uppercase;
-    }
-    .detail-title {
-      font-family: var(--condensed);
-      font-size: 1.9rem; font-weight: 900;
-      text-transform: uppercase; letter-spacing: 0.02em;
-      line-height: 1;
-    }
-    .detail-year {
-      font-family: var(--mono); font-size: 9.5px;
-      color: var(--ink-light); letter-spacing: 0.12em;
-    }
-    .detail-tags {
-      display: flex; flex-wrap: wrap; gap: 5px;
-    }
-    .detail-tag {
-      font-family: var(--mono); font-size: 8.5px;
-      letter-spacing: 0.08em; padding: 3px 8px;
-      border: 0.5px solid rgba(0,0,0,0.3);
-      background: rgba(0,0,0,0.05);
-      text-transform: uppercase;
-    }
-    .detail-divider {
-      border: none; border-top: 0.5px solid rgba(0,0,0,0.18);
-    }
-    .detail-desc {
-      font-size: 13px; color: #444; line-height: 1.65;
-      font-weight: 300;
-    }
-    .detail-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    }
-    .detail-field { display: flex; flex-direction: column; gap: 2px; }
-    .df-label {
-      font-family: var(--mono); font-size: 8px;
-      letter-spacing: 0.15em; color: var(--ink-light);
-      text-transform: uppercase;
-    }
-    .df-val {
-      font-family: var(--mono); font-size: 10px;
-      color: var(--ink); letter-spacing: 0.05em;
-    }
-    .detail-btn {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 14px;
-      border: 0.5px solid rgba(0,0,0,0.35);
-      background: var(--ink); color: var(--paper);
-      font-family: var(--mono); font-size: 10px;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      cursor: pointer; text-decoration: none;
-      transition: background 0.15s;
-    }
-    .detail-btn:hover { background: var(--accent); border-color: var(--accent); }
+    .d-num  { font-family: var(--mono); font-size: 8.5px; letter-spacing: .2em; color: var(--ink-light); text-transform: uppercase; }
+    .d-ttl  { font-family: var(--cond); font-size: 1.65rem; font-weight: 900; text-transform: uppercase; line-height: 1; }
+    .d-yr   { font-family: var(--mono); font-size: 8.5px; color: var(--ink-light); letter-spacing: .12em; }
+    .d-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+    .dtag   { font-family: var(--mono); font-size: 7.5px; letter-spacing: .08em; padding: 2px 6px; border: .5px solid rgba(0,0,0,.26); background: rgba(0,0,0,.04); text-transform: uppercase; }
+    .d-div  { border: none; border-top: .5px solid rgba(0,0,0,.15); }
+    .d-desc { font-size: 11.5px; color: #444; line-height: 1.65; font-weight: 300; }
+    .d-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .d-f    { display: flex; flex-direction: column; gap: 1px; }
+    .d-fl   { font-family: var(--mono); font-size: 7px; letter-spacing: .15em; color: var(--ink-light); text-transform: uppercase; }
+    .d-fv   { font-family: var(--mono); font-size: 9.5px; color: var(--ink); }
+    .det-btn { padding: 8px 11px; border: .5px solid rgba(0,0,0,.28); background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: background .15s; }
+    .det-btn:hover { background: var(--accent); border-color: var(--accent); }
   </style>
 </head>
 <body>
-  <div class="page-wrapper">
+<div class="site">
+  <div class="gov">
+    <div class="gl gl-h" style="top:50%"></div>
+    <div class="gl gl-v" style="left:50%"></div>
+    <div class="xhair" style="top:50%;left:50%"></div>
+    <div class="reg" style="top:0;left:0"></div><div class="reg" style="top:0;right:0"></div>
+  </div>
 
-    <div class="grid-overlay">
-      <div class="gl gl-h" style="top:50%"></div>
-      <div class="gl gl-v" style="left:50%"></div>
-      <div class="crosshair" style="top:50%;left:50%"></div>
-      <div class="reg-mark" style="top:28px;left:0"></div>
-      <div class="reg-mark" style="top:28px;right:0"></div>
+  <header class="topbar">
+    <div class="tb-l">
+      <button class="back-btn" onclick="navigateTo('index.html')">← HOME</button>
+      <span>PROJECTS</span><span>FLOPPY ARCHIVE</span>
     </div>
+    <div class="tb-r"><span id="diskCount">— DISKS</span><span>2025</span></div>
+  </header>
 
-    <header class="topbar">
-      <div class="topbar-left">
-        <a href="index.html" data-nav style="color:inherit;text-decoration:none;letter-spacing:0.13em;">← HOME</a>
-        <span>PROJECTS</span>
-        <span>FLOPPY ARCHIVE</span>
-      </div>
-      <div class="topbar-right">
-        <span>5 DISKS</span>
-        <span>2025</span>
-      </div>
-    </header>
+  <div class="cbar"><div class="cs cs-r"></div><div class="cs cs-o"></div><div class="cs cs-y"></div><div class="cs cs-w"></div><div class="cs cs-h"></div></div>
 
-    <div class="color-bar top">
-      <div class="cs cs-red"></div><div class="cs cs-orange"></div>
-      <div class="cs cs-yellow"></div><div class="cs cs-white"></div>
-      <div class="cs cs-hatch"></div>
-    </div>
+  <div class="content">
+    <div class="page-wrapper" style="height:100%">
+      <div class="proj-layout">
 
-    <div class="content-area">
-      <div class="projects-layout">
-
-        <!-- disk shelf -->
+        <!-- ── Left: disk shelf ── -->
         <div class="disk-shelf">
-          <div class="shelf-header">
+          <div class="shelf-hdr">
             <div class="shelf-title">Floppy<br>Archive</div>
-            <div class="shelf-meta">5 DISKS<br>SORTED BY DATE</div>
+            <div class="shelf-meta" id="shelfMeta">LOADING...<br>BY DATE</div>
           </div>
+          <!-- Disks injected by JS below -->
           <div class="disk-grid" id="diskGrid"></div>
         </div>
 
-        <!-- detail panel -->
-        <div class="detail-panel">
-          <div class="detail-empty" id="detailEmpty">
-            <div class="detail-empty-icon">💾</div>
-            <div class="detail-empty-text">Insert disk<br>to load project</div>
+        <!-- ── Right: detail panel ── -->
+        <div class="det-panel">
+          <div class="det-empty" id="dEmpty">
+            <div class="det-empty-ico">💾</div>
+            <div class="det-empty-txt">Click a disk<br>to load project</div>
           </div>
-          <div class="detail-content" id="detailContent">
-            <div class="detail-num" id="dNum"></div>
-            <div class="detail-title" id="dTitle"></div>
-            <div class="detail-year" id="dYear"></div>
-            <div class="detail-tags" id="dTags"></div>
-            <hr class="detail-divider">
-            <div class="detail-desc" id="dDesc"></div>
-            <div class="detail-row">
-              <div class="detail-field">
-                <span class="df-label">Role</span>
-                <span class="df-val" id="dRole"></span>
-              </div>
-              <div class="detail-field">
-                <span class="df-label">Status</span>
-                <span class="df-val" id="dStatus"></span>
-              </div>
-              <div class="detail-field">
-                <span class="df-label">Team</span>
-                <span class="df-val" id="dTeam"></span>
-              </div>
-              <div class="detail-field">
-                <span class="df-label">Duration</span>
-                <span class="df-val" id="dDuration"></span>
-              </div>
+          <div class="det" id="dContent">
+            <div class="d-num"  id="dNum"></div>
+            <div class="d-ttl"  id="dTtl"></div>
+            <div class="d-yr"   id="dYr"></div>
+            <div class="d-tags" id="dTags"></div>
+            <hr class="d-div">
+            <div class="d-desc" id="dDesc"></div>
+            <div class="d-row">
+              <div class="d-f"><span class="d-fl">Role</span><span class="d-fv" id="dRole"></span></div>
+              <div class="d-f"><span class="d-fl">Status</span><span class="d-fv" id="dStat"></span></div>
+              <div class="d-f"><span class="d-fl">Team</span><span class="d-fv" id="dTeam"></span></div>
+              <div class="d-f"><span class="d-fl">Duration</span><span class="d-fv" id="dDur"></span></div>
             </div>
-            <hr class="detail-divider">
-            <a class="detail-btn" id="dLink" href="#" target="_blank">↗ View Project</a>
-            <a class="detail-btn" href="project-detail.html" data-nav style="background:transparent;color:var(--ink);margin-top:-8px;">→ Full Case Study</a>
+            <hr class="d-div">
+            <button class="det-btn" onclick="navigateTo('project-detail.html')">→ Full Case Study</button>
           </div>
         </div>
 
       </div>
     </div>
-
-    <div class="color-bar bottom">
-      <div class="cs cs-red"></div><div class="cs cs-orange"></div>
-      <div class="cs cs-yellow"></div><div class="cs cs-white"></div>
-      <div class="cs cs-hatch"></div>
-    </div>
-    <footer class="bottom-bar">
-      <div class="bb-left">YOUR-NAME<br>PROJECTS</div>
-      <div class="bb-center">FLOPPY ARCHIVE · SHIPPED WORK</div>
-      <div class="bb-right">CLICK DISK<br>TO INSPECT</div>
-    </footer>
   </div>
 
-  <script src="nav.js"></script>
-  <script>
-    const projects = [
-      {
-        id: '001', color: 'col-red',
-        title: 'Project Alpha',
-        labelTitle: 'ALPHA',
-        year: '2024',
-        tags: ['React', 'TypeScript', 'PostgreSQL', 'Node.js'],
-        desc: 'A short description of what this project does, the problem it solves, and why it matters. Highlight scale, interesting technical challenges, or user impact here.',
-        role: 'Full-Stack', status: 'Shipped', team: 'Solo', duration: '3 months',
-        link: '#'
-      },
-      {
-        id: '002', color: 'col-amber',
-        title: 'Project Beta',
-        labelTitle: 'BETA',
-        year: '2024',
-        tags: ['Go', 'gRPC', 'Redis', 'Docker'],
-        desc: 'Backend-heavy project focused on performance and reliability. Built a distributed system that handles X requests per second with Y ms latency.',
-        role: 'Backend', status: 'Shipped', team: '2 people', duration: '2 months',
-        link: '#'
-      },
-      {
-        id: '003', color: 'col-blue',
-        title: 'Project Gamma',
-        labelTitle: 'GAMMA',
-        year: '2023',
-        tags: ['Rust', 'WASM', 'CLI', 'Cargo'],
-        desc: 'A CLI tool or library that solves a specific developer pain point. Open-sourced with N stars on GitHub.',
-        role: 'Author', status: 'Open Source', team: 'Solo', duration: '6 weeks',
-        link: '#'
-      },
-      {
-        id: '004', color: 'col-green',
-        title: 'Project Delta',
-        labelTitle: 'DELTA',
-        year: '2023',
-        tags: ['Next.js', 'Tailwind', 'Prisma', 'Vercel'],
-        desc: 'Full-stack web app with a polished UI and clean data layer. Shipped to production with real users.',
-        role: 'Full-Stack', status: 'Shipped', team: '3 people', duration: '4 months',
-        link: '#'
-      },
-      {
-        id: '005', color: 'col-purple',
-        title: 'Project Epsilon',
-        labelTitle: 'EPSLN',
-        year: '2025',
-        tags: ['Python', 'FastAPI', 'ML', 'AWS'],
-        desc: 'Machine learning pipeline and API layer for a data-driven application. Currently in active development.',
-        role: 'Backend / ML', status: 'In Progress', team: 'Solo', duration: 'Ongoing',
-        link: '#'
-      }
-    ];
+  <div class="cbar"><div class="cs cs-r"></div><div class="cs cs-o"></div><div class="cs cs-y"></div><div class="cs cs-w"></div><div class="cs cs-h"></div></div>
+  <footer class="bbar">
+    <div class="bb-l">YOUR-NAME<br>PROJECTS</div><!-- ← CHANGE -->
+    <div class="bb-c">FLOPPY ARCHIVE · SHIPPED WORK</div>
+    <div class="bb-r">CLICK DISK<br>TO INSPECT</div>
+  </footer>
+</div>
 
-    const grid = document.getElementById('diskGrid');
-    let active = null;
+<script src="nav.js"></script>
+<script>
+/* ============================================================
+   PROJECTS DATA
+   ── Add a project by copying one of the objects below.
+   ── col options: col-r (red), col-a (amber), col-b (blue),
+                   col-g (green), col-p (purple)
+   ── Keep id sequential (001, 002, …)
+   ============================================================ */
+const PROJECTS = [
+  {
+    id: '001', col: 'col-r',
+    title: 'Project Alpha', lbl: 'ALPHA', yr: '2024',
+    tags: ['React', 'TypeScript', 'PostgreSQL'],
+    desc: 'Full-stack application solving a specific user problem. Highlight scale, technical challenge, or business impact here.',
+    role: 'Full-Stack', status: 'Shipped', team: 'Solo', dur: '3 months',
+  },
+  {
+    id: '002', col: 'col-a',
+    title: 'Project Beta', lbl: 'BETA', yr: '2024',
+    tags: ['Go', 'gRPC', 'Redis'],
+    desc: 'Backend-focused project built for performance. Handles high request volume with low latency.',
+    role: 'Backend', status: 'Shipped', team: '2 people', dur: '2 months',
+  },
+  {
+    id: '003', col: 'col-b',
+    title: 'Project Gamma', lbl: 'GAMMA', yr: '2023',
+    tags: ['Rust', 'WASM', 'CLI'],
+    desc: 'Open-source CLI tool solving a developer pain point. Published with active community use.',
+    role: 'Author', status: 'Open Source', team: 'Solo', dur: '6 weeks',
+  },
+  {
+    id: '004', col: 'col-g',
+    title: 'Project Delta', lbl: 'DELTA', yr: '2023',
+    tags: ['Next.js', 'Tailwind', 'Prisma'],
+    desc: 'Full-stack web app with polished UI and clean data layer. Shipped to production with real users.',
+    role: 'Full-Stack', status: 'Shipped', team: '3 people', dur: '4 months',
+  },
+  {
+    id: '005', col: 'col-p',
+    title: 'Epsilon', lbl: 'EPSLN', yr: '2025',
+    tags: ['Python', 'FastAPI', 'ML'],
+    desc: 'ML pipeline and API for a data-driven application. Currently in active development.',
+    role: 'Backend/ML', status: 'In Progress', team: 'Solo', dur: 'Ongoing',
+  },
+];
 
-    projects.forEach((p, i) => {
-      const el = document.createElement('div');
-      el.className = `floppy ${p.color}`;
-      el.innerHTML = `
-        <div class="disk-body">
-          <div class="disk-notch"></div>
-          <div class="disk-shutter"></div>
-          <div class="disk-label-area">
-            <div class="disk-label-title">${p.labelTitle}</div>
-            <div class="disk-label-line"></div>
-            <div class="disk-label-sub">${p.id} · ${p.year}</div>
-          </div>
-        </div>
-        <div class="floppy-name">${p.title}</div>
-      `;
-      el.addEventListener('click', () => loadDisk(el, p));
-      grid.appendChild(el);
-    });
+// Update topbar count
+document.getElementById('diskCount').textContent = `${PROJECTS.length} DISKS`;
+document.getElementById('shelfMeta').innerHTML   = `${PROJECTS.length} DISKS<br>BY DATE`;
 
-    function loadDisk(el, p) {
-      document.querySelectorAll('.floppy').forEach(f => f.classList.remove('active'));
-      el.classList.add('active');
+const grid = document.getElementById('diskGrid');
 
-      document.getElementById('detailEmpty').style.display = 'none';
-      const dc = document.getElementById('detailContent');
-      dc.classList.remove('visible');
-      void dc.offsetWidth; // reflow
-      dc.classList.add('visible');
+PROJECTS.forEach(p => {
+  const el = document.createElement('div');
+  el.className = `floppy ${p.col}`;
+  el.innerHTML = `
+    <div class="disk-body">
+      <div class="disk-notch"></div>
+      <div class="disk-sht"></div>
+      <div class="disk-lbl">
+        <div class="disk-lt">${p.lbl}</div>
+        <div class="disk-ll"></div>
+        <div class="disk-ls">${p.id}·${p.yr}</div>
+      </div>
+    </div>
+    <div class="floppy-nm">${p.title}</div>
+  `;
 
-      document.getElementById('dNum').textContent = `DISK_${p.id}`;
-      document.getElementById('dTitle').textContent = p.title;
-      document.getElementById('dYear').textContent = `YEAR: ${p.year}`;
-      document.getElementById('dTags').innerHTML = p.tags.map(t => `<span class="detail-tag">${t}</span>`).join('');
-      document.getElementById('dDesc').textContent = p.desc;
-      document.getElementById('dRole').textContent = p.role;
-      document.getElementById('dStatus').textContent = p.status;
-      document.getElementById('dTeam').textContent = p.team;
-      document.getElementById('dDuration').textContent = p.duration;
-      document.getElementById('dLink').href = p.link;
-    }
-  </script>
+  el.addEventListener('click', () => {
+    // Deselect all, select clicked
+    document.querySelectorAll('.floppy').forEach(f => f.classList.remove('sel'));
+    el.classList.add('sel');
+
+    // Show detail panel with animation
+    document.getElementById('dEmpty').style.display = 'none';
+    const dc = document.getElementById('dContent');
+    dc.classList.remove('vis');
+    void dc.offsetWidth; // force reflow to restart animation
+    dc.classList.add('vis');
+
+    // Populate fields
+    document.getElementById('dNum').textContent  = `DISK_${p.id}`;
+    document.getElementById('dTtl').textContent  = p.title;
+    document.getElementById('dYr').textContent   = `YEAR: ${p.yr}`;
+    document.getElementById('dTags').innerHTML   = p.tags.map(t => `<span class="dtag">${t}</span>`).join('');
+    document.getElementById('dDesc').textContent = p.desc;
+    document.getElementById('dRole').textContent = p.role;
+    document.getElementById('dStat').textContent = p.status;
+    document.getElementById('dTeam').textContent = p.team;
+    document.getElementById('dDur').textContent  = p.dur;
+  });
+
+  grid.appendChild(el);
+});
+</script>
 </body>
 </html>
