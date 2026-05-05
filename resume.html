@@ -6,286 +6,410 @@
   <title>Résumé — Your Name</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ── Two-column layout: section nav | resume body ── */
-    .res-layout { display: grid; grid-template-columns: 185px 1fr; height: 100%; }
+    .resume-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      height: 100%;
+    }
 
-    /* Section navigation sidebar */
-    .res-nav { border-right: .5px solid rgba(0,0,0,.18); padding: 16px 0; display: flex; flex-direction: column; }
-    .rn-hdr  { font-family: var(--mono); font-size: 8px; letter-spacing: .18em; color: var(--ink-light); text-transform: uppercase; padding: 0 12px; margin-bottom: 7px; }
-    .rn-item { display: flex; align-items: center; gap: 6px; padding: 7px 12px; font-size: 11.5px; color: #555; cursor: pointer; border-left: 2px solid transparent; transition: color .15s, background .15s; }
-    .rn-item:hover { color: var(--ink); background: rgba(0,0,0,.04); }
-    .rn-item.on    { color: var(--ink); border-left-color: var(--accent); background: rgba(0,0,0,.03); font-weight: 500; }
-    .rn-ic  { font-family: var(--mono); font-size: 9.5px; color: inherit; min-width: 13px; }
-    .rn-div { border: none; border-top: .5px solid rgba(0,0,0,.13); margin: 5px 12px; }
+    /* ── section nav ── */
+    .resume-nav {
+      border-right: 0.5px solid rgba(0,0,0,0.2);
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .rnav-header {
+      font-family: var(--mono);
+      font-size: 9px; letter-spacing: 0.18em;
+      color: var(--ink-light); text-transform: uppercase;
+      padding: 0 16px; margin-bottom: 10px;
+    }
+    .rnav-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 16px;
+      font-size: 12.5px; color: #555;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: color 0.15s, background 0.15s;
+    }
+    .rnav-item:hover { color: var(--ink); background: rgba(0,0,0,0.04); }
+    .rnav-item.active {
+      color: var(--ink);
+      border-left-color: var(--accent);
+      background: rgba(0,0,0,0.03);
+      font-weight: 500;
+    }
+    .rnav-icon {
+      font-family: var(--mono); font-size: 10px;
+      color: inherit; min-width: 16px;
+    }
 
-    /* PDF download button */
+    .rnav-divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.15); margin: 8px 16px; }
+
     .pdf-btn {
-      margin: auto 10px 10px;
-      padding: 9px 10px;
+      margin: auto 12px 12px;
+      padding: 10px 12px;
       background: var(--ink); color: var(--paper);
-      font-family: var(--mono); font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase;
-      border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;
-      transition: background .15s;
+      font-family: var(--mono); font-size: 9.5px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      justify-content: center;
+      transition: background 0.15s;
     }
     .pdf-btn:hover { background: var(--accent); }
 
-    /* Scrollable resume content */
-    .res-body { overflow-y: auto; padding: 20px 28px; scroll-behavior: smooth; }
-    .res-body::-webkit-scrollbar { width: 3px; }
-    .res-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); }
+    /* ── resume content ── */
+    .resume-content {
+      overflow-y: auto;
+      padding: 28px 36px;
+      scroll-behavior: smooth;
+    }
+    .resume-content::-webkit-scrollbar { width: 4px; }
+    .resume-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
 
-    /* Name/contact header */
-    .res-hdr-blk { display: grid; grid-template-columns: 1fr auto; align-items: end; padding-bottom: 12px; border-bottom: .5px solid rgba(0,0,0,.18); margin-bottom: 20px; }
-    .res-name { font-family: var(--cond); font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 900; text-transform: uppercase; line-height: .93; }
-    .res-con  { font-family: var(--mono); font-size: 8px; letter-spacing: .1em; color: var(--ink-light); text-transform: uppercase; text-align: right; line-height: 1.8; }
+    .resume-header-block {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      padding-bottom: 16px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.2);
+      margin-bottom: 28px;
+    }
+    .resume-name {
+      font-family: var(--condensed);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      line-height: 0.93;
+    }
+    .resume-contact-line {
+      font-family: var(--mono);
+      font-size: 9px; letter-spacing: 0.1em;
+      color: var(--ink-light); text-transform: uppercase;
+      text-align: right; line-height: 1.8;
+    }
 
-    /* Section scroll anchors */
-    .res-sec { margin-bottom: 22px; scroll-margin-top: 12px; }
+    /* ── resume section ── */
+    .resume-section {
+      margin-bottom: 32px;
+      scroll-margin-top: 20px;
+    }
 
-    /* Summary */
-    .sum-txt { font-size: 12px; color: #444; line-height: 1.7; font-weight: 300; border-left: 2px solid var(--accent); padding-left: 11px; max-width: 580px; }
+    .section-heading {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 14px;
+    }
+    .section-label {
+      font-family: var(--condensed);
+      font-size: 1.1rem; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .section-line {
+      flex: 1; height: 0.5px; background: rgba(0,0,0,0.25);
+    }
+    .section-num {
+      font-family: var(--mono); font-size: 9px;
+      color: var(--ink-light); letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
 
-    /* Experience/Education entries */
-    .entry { display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; padding: 10px 0; border-bottom: .5px solid rgba(0,0,0,.08); }
+    /* summary */
+    .summary-text {
+      font-size: 13.5px; color: #444; line-height: 1.7;
+      font-weight: 300; max-width: 660px;
+      border-left: 2px solid var(--accent);
+      padding-left: 14px;
+    }
+
+    /* experience & education */
+    .entry {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px 16px;
+      padding: 14px 0;
+      border-bottom: 0.5px solid rgba(0,0,0,0.1);
+    }
     .entry:last-child { border-bottom: none; }
-    .e-ttl  { font-size: 12.5px; font-weight: 600; }
-    .e-date { font-family: var(--mono); font-size: 8.5px; color: var(--ink-light); letter-spacing: .1em; white-space: nowrap; margin-top: 2px; }
-    .e-org  { font-size: 11.5px; color: #555; grid-column: 1; }
-    .e-bul  { grid-column: 1 / -1; padding-left: 11px; margin-top: 3px; }
-    .e-bul li { font-size: 11.5px; color: #444; line-height: 1.6; font-weight: 300; margin-bottom: 2px; }
 
-    /* Project entries */
-    .pe { padding: 9px 0; border-bottom: .5px solid rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 3px; }
-    .pe:last-child { border-bottom: none; }
-    .pe-hdr  { display: flex; align-items: baseline; gap: 7px; }
-    .pe-nm   { font-size: 12.5px; font-weight: 600; }
-    .pe-stk  { font-family: var(--mono); font-size: 8px; color: var(--ink-light); letter-spacing: .08em; }
-    .pe-desc { font-size: 11.5px; color: #444; line-height: 1.6; font-weight: 300; }
+    .entry-title { font-size: 14px; font-weight: 600; }
+    .entry-date {
+      font-family: var(--mono); font-size: 9.5px;
+      color: var(--ink-light); letter-spacing: 0.1em;
+      white-space: nowrap; margin-top: 2px;
+    }
+    .entry-org {
+      font-size: 12.5px; color: #555;
+      grid-column: 1;
+    }
+    .entry-bullets {
+      grid-column: 1 / -1;
+      padding-left: 14px;
+      margin-top: 6px;
+    }
+    .entry-bullets li {
+      font-size: 12.5px; color: #444;
+      line-height: 1.6; font-weight: 300;
+      margin-bottom: 3px;
+    }
 
-    /* Skills grid */
-    .skl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 7px; }
-    .skl-grp  { border: .5px solid rgba(0,0,0,.15); padding: 9px; background: var(--paper); }
-    .sg-lbl   { font-family: var(--mono); font-size: 7.5px; letter-spacing: .15em; color: var(--ink-light); text-transform: uppercase; margin-bottom: 5px; }
-    .sg-pills { display: flex; flex-wrap: wrap; gap: 3px; }
-    .sg-pill  { font-family: var(--mono); font-size: 8px; padding: 2px 5px; border: .5px solid rgba(0,0,0,.22); background: rgba(0,0,0,.04); }
+    /* projects */
+    .proj-entry {
+      padding: 12px 0;
+      border-bottom: 0.5px solid rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .proj-entry:last-child { border-bottom: none; }
+    .proj-entry-header { display: flex; align-items: baseline; gap: 10px; }
+    .proj-entry-name { font-size: 13.5px; font-weight: 600; }
+    .proj-entry-stack {
+      font-family: var(--mono); font-size: 9px;
+      color: var(--ink-light); letter-spacing: 0.08em;
+    }
+    .proj-entry-desc {
+      font-size: 12.5px; color: #444; line-height: 1.6; font-weight: 300;
+    }
 
-    /* ── Print / PDF styles ──
-       window.print() triggers these.
-       Hides all chrome and outputs a clean single-column resume. */
-    @media print {
-      .site { display: block !important; height: auto !important; }
-      .topbar, .cbar, .bbar, .res-nav, .gov { display: none !important; }
-      .content { position: static !important; overflow: visible !important; }
-      .res-layout { grid-template-columns: 1fr !important; }
-      .res-body { overflow: visible !important; padding: 0 !important; }
-      body, html { overflow: visible !important; height: auto !important; background: white !important; }
-      .res-sec { break-inside: avoid; }
+    /* leadership */
+    .lead-entry {
+      padding: 12px 0;
+      border-bottom: 0.5px solid rgba(0,0,0,0.1);
+      display: grid; grid-template-columns: 1fr auto; gap: 4px;
+    }
+    .lead-entry:last-child { border-bottom: none; }
+    .lead-title { font-size: 13.5px; font-weight: 600; }
+    .lead-org { font-size: 12.5px; color: #555; grid-column: 1; }
+    .lead-date { font-family: var(--mono); font-size: 9.5px; color: var(--ink-light); letter-spacing: 0.1em; }
+    .lead-desc { font-size: 12.5px; color: #444; line-height: 1.6; font-weight: 300; grid-column: 1 / -1; margin-top: 4px; }
+
+    /* skills */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .skill-group {
+      border: 0.5px solid rgba(0,0,0,0.18);
+      padding: 12px;
+      background: var(--paper);
+    }
+    .skill-group-label {
+      font-family: var(--mono); font-size: 8.5px;
+      letter-spacing: 0.15em; color: var(--ink-light);
+      text-transform: uppercase; margin-bottom: 7px;
+    }
+    .skill-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+    .skill-pill {
+      font-family: var(--mono); font-size: 9px;
+      padding: 2px 7px;
+      border: 0.5px solid rgba(0,0,0,0.25);
+      letter-spacing: 0.06em; background: rgba(0,0,0,0.04);
     }
   </style>
 </head>
 <body>
-<div class="site">
-  <div class="gov">
-    <div class="gl gl-v" style="left:185px"></div>
-    <div class="reg" style="top:0;left:0"></div><div class="reg" style="top:0;right:0"></div>
-  </div>
+  <div class="page-wrapper">
 
-  <header class="topbar">
-    <div class="tb-l">
-      <button class="back-btn" onclick="navigateTo('index.html')">← HOME</button>
-      <span>RÉSUMÉ</span><span>CURRICULUM VITAE</span>
+    <div class="grid-overlay">
+      <div class="gl gl-v" style="left:200px"></div>
+      <div class="reg-mark" style="top:28px;left:0"></div>
+      <div class="reg-mark" style="top:28px;right:0"></div>
     </div>
-    <div class="tb-r"><span>6 SECTIONS</span><span>2025</span></div>
-  </header>
 
-  <div class="cbar"><div class="cs cs-r"></div><div class="cs cs-o"></div><div class="cs cs-y"></div><div class="cs cs-w"></div><div class="cs cs-h"></div></div>
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="index.html" data-nav style="color:inherit;text-decoration:none;letter-spacing:0.13em;">← HOME</a>
+        <span>RÉSUMÉ</span>
+        <span>CURRICULUM VITAE</span>
+      </div>
+      <div class="topbar-right">
+        <span>6 SECTIONS</span>
+        <span>2025</span>
+      </div>
+    </header>
 
-  <div class="content">
-    <div class="page-wrapper" style="height:100%">
-      <div class="res-layout">
+    <div class="color-bar top">
+      <div class="cs cs-red"></div><div class="cs cs-orange"></div>
+      <div class="cs cs-yellow"></div><div class="cs cs-white"></div>
+      <div class="cs cs-hatch"></div>
+    </div>
 
-        <!-- Section nav (left) -->
-        <nav class="res-nav">
-          <div class="rn-hdr">// Sections</div>
-          <!-- data-sec must match the id on the .res-sec below -->
-          <div class="rn-item on" data-sec="rs-summary"><span class="rn-ic">§</span>Summary</div>
-          <div class="rn-item" data-sec="rs-exp"><span class="rn-ic">§</span>Experience</div>
-          <div class="rn-item" data-sec="rs-edu"><span class="rn-ic">§</span>Education</div>
-          <div class="rn-item" data-sec="rs-proj"><span class="rn-ic">§</span>Projects</div>
-          <div class="rn-item" data-sec="rs-lead"><span class="rn-ic">§</span>Leadership</div>
-          <div class="rn-item" data-sec="rs-skills"><span class="rn-ic">§</span>Skills</div>
-          <hr class="rn-div">
-          <!-- Triggers @media print styles which output a clean PDF -->
-          <button class="pdf-btn" onclick="window.print()">↓ Download PDF</button>
+    <div class="content-area">
+      <div class="resume-layout">
+
+        <!-- section nav -->
+        <nav class="resume-nav">
+          <div class="rnav-header">// Sections</div>
+          <div class="rnav-item active" data-target="sec-summary"><span class="rnav-icon">§</span>Summary</div>
+          <div class="rnav-item" data-target="sec-experience"><span class="rnav-icon">§</span>Experience</div>
+          <div class="rnav-item" data-target="sec-education"><span class="rnav-icon">§</span>Education</div>
+          <div class="rnav-item" data-target="sec-projects"><span class="rnav-icon">§</span>Projects</div>
+          <div class="rnav-item" data-target="sec-leadership"><span class="rnav-icon">§</span>Leadership</div>
+          <div class="rnav-item" data-target="sec-skills"><span class="rnav-icon">§</span>Skills</div>
+          <hr class="rnav-divider">
+          <button class="pdf-btn" onclick="downloadPDF()">↓ Download PDF</button>
         </nav>
 
-        <!-- Resume body (scrollable) -->
-        <div class="res-body" id="resBody">
+        <!-- resume body -->
+        <div class="resume-content" id="resumeContent">
 
-          <!-- ── Name / contact header ──
-               ← CHANGE: your name and contact info -->
-          <div class="res-hdr-blk">
-            <div class="res-name">Your<br>Name</div>
-            <div class="res-con">
-              you@email.com<br><!-- ← CHANGE -->
-              linkedin.com/in/yourname<br><!-- ← CHANGE -->
-              github.com/yourhandle<br><!-- ← CHANGE -->
-              Riverside, CA
+          <!-- name header -->
+          <div class="resume-header-block">
+            <div class="resume-name">Ansel<br>Chua</div>
+            <div class="resume-contact-line">
             </div>
           </div>
 
-          <!-- ── 01 SUMMARY ── -->
-          <section class="res-sec" id="rs-summary">
-            <div class="sec-hdg"><span class="sec-lbl">Summary</span><div class="sec-line"></div><span class="sec-num">01</span></div>
-            <!--
-              ← CHANGE: 2–3 sentences.
-              What you do, your tech, what you're looking for.
-            -->
-            <p class="sum-txt">Software engineer with X+ years building scalable full-stack applications. Experienced in TypeScript, React, Go, and cloud infrastructure. Passionate about clean architecture, developer tooling, and open source. Currently studying CS at UC Riverside.</p>
+          <!-- SUMMARY -->
+          <section class="resume-section" id="sec-summary">
+            <div class="section-heading">
+              <span class="section-label">Summary</span>
+              <div class="section-line"></div>
+              <span class="section-num">01</span>
+            </div>
+            <p class="summary-text">
+            </p>
           </section>
 
-          <!-- ── 02 EXPERIENCE ──
-               ← CHANGE: Add/edit entries.
-               Each .entry = one job.
-               Copy the block for a second role. -->
-          <section class="res-sec" id="rs-exp">
-            <div class="sec-hdg"><span class="sec-lbl">Experience</span><div class="sec-line"></div><span class="sec-num">02</span></div>
-            <div class="entry">
-              <div class="e-ttl">Software Engineer Intern</div>
-              <div class="e-date">Jun–Aug 2024</div>
-              <div class="e-org">Company Name · City, CA</div><!-- ← CHANGE -->
-              <ul class="e-bul">
-                <li>Specific technical contribution with measurable impact on team or product.</li>
-                <li>Built or improved X using Y technology, resulting in Z improvement.</li>
-              </ul>
+          <!-- EXPERIENCE -->
+          <section class="resume-section" id="sec-experience">
+            <div class="section-heading">
+              <span class="section-label">Experience</span>
+              <div class="section-line"></div>
+              <span class="section-num">02</span>
             </div>
             <div class="entry">
-              <div class="e-ttl">Software Developer</div>
-              <div class="e-date">Jan–May 2024</div>
-              <div class="e-org">Another Company · Remote</div><!-- ← CHANGE -->
-              <ul class="e-bul">
-                <li>Technical contribution with measurable outcome or scale.</li>
-                <li>Action verb + context + result format.</li>
+              <div class="entry-title"></div>
+              <div class="entry-date"></div>
+              <div class="entry-org"></div>
+              <ul class="entry-bullets">
               </ul>
             </div>
           </section>
 
-          <!-- ── 03 EDUCATION ── -->
-          <section class="res-sec" id="rs-edu">
-            <div class="sec-hdg"><span class="sec-lbl">Education</span><div class="sec-line"></div><span class="sec-num">03</span></div>
+          <!-- EDUCATION -->
+          <section class="resume-section" id="sec-education">
+            <div class="section-heading">
+              <span class="section-label">Education</span>
+              <div class="section-line"></div>
+              <span class="section-num">03</span>
+            </div>
             <div class="entry">
-              <div class="e-ttl">B.S. Computer Science</div>
-              <div class="e-date">Expected May 2026</div>
-              <div class="e-org">University of California, Riverside</div>
-              <ul class="e-bul">
-                <li>GPA: X.X / 4.0 · Dean's List</li><!-- ← CHANGE -->
-                <li>Relevant: Data Structures, Algorithms, OS, Databases, Networks</li>
+              <div class="entry-title"></div>
+              <div class="entry-date"></div>
+              <div class="entry-org"></div>
+              <ul class="entry-bullets">
               </ul>
             </div>
           </section>
 
-          <!-- ── 04 PROJECTS ──
-               ← CHANGE: Add/remove .pe blocks. -->
-          <section class="res-sec" id="rs-proj">
-            <div class="sec-hdg"><span class="sec-lbl">Projects</span><div class="sec-line"></div><span class="sec-num">04</span></div>
-            <div class="pe">
-              <div class="pe-hdr"><span class="pe-nm">Project Alpha</span><span class="pe-stk">React · TypeScript · PostgreSQL</span></div>
-              <div class="pe-desc">One-line summary of the project and its most impressive technical aspect or user outcome.</div>
+          <!-- PROJECTS -->
+          <section class="resume-section" id="sec-projects">
+            <div class="section-heading">
+              <span class="section-label">Projects</span>
+              <div class="section-line"></div>
+              <span class="section-num">04</span>
             </div>
-            <div class="pe">
-              <div class="pe-hdr"><span class="pe-nm">Project Beta</span><span class="pe-stk">Go · gRPC · Redis</span></div>
-              <div class="pe-desc">Concise description focusing on technical challenge and impact. Include metrics where possible.</div>
-            </div>
-            <div class="pe">
-              <div class="pe-hdr"><span class="pe-nm">Project Gamma</span><span class="pe-stk">Rust · WASM · CLI</span></div>
-              <div class="pe-desc">Open-source CLI tool. Solves a developer pain point. N GitHub stars.</div>
+            <div class="proj-entry">
+              <div class="proj-entry-header">
+                <span class="proj-entry-name"></span>
+                <span class="proj-entry-stack"></span>
+              </div>
+              <div class="proj-entry-desc"></div>
             </div>
           </section>
 
-          <!-- ── 05 LEADERSHIP & CAMPUS ── -->
-          <section class="res-sec" id="rs-lead">
-            <div class="sec-hdg"><span class="sec-lbl">Leadership & Campus</span><div class="sec-line"></div><span class="sec-num">05</span></div>
-            <div class="entry">
-              <div class="e-ttl">President / Lead</div><!-- ← CHANGE -->
-              <div class="e-date">Sep 2023–Present</div>
-              <div class="e-org">CS Club · UC Riverside</div><!-- ← CHANGE -->
-              <ul class="e-bul"><li>Led N-member team. Organized workshops and events with measurable impact.</li></ul>
+          <!-- LEADERSHIP -->
+          <section class="resume-section" id="sec-leadership">
+            <div class="section-heading">
+              <span class="section-label">Leadership & Campus</span>
+              <div class="section-line"></div>
+              <span class="section-num">05</span>
             </div>
-            <div class="entry">
-              <div class="e-ttl">Teaching Assistant</div><!-- ← CHANGE -->
-              <div class="e-date">Jan–Jun 2024</div>
-              <div class="e-org">Dept. of Computer Science · UCR</div>
-              <ul class="e-bul"><li>Supported N students in [course]. Held office hours and led discussion sections.</li></ul>
+            <div class="lead-entry">
+              <div class="lead-title"></div>
+              <div class="lead-date"></div>
+              <div class="lead-org"></div>
+              <div class="lead-desc"></div>
             </div>
           </section>
 
-          <!-- ── 06 SKILLS ──
-               ← CHANGE: Edit .sg-pill tags per group. Add a new .skl-grp for a new category. -->
-          <section class="res-sec" id="rs-skills">
-            <div class="sec-hdg"><span class="sec-lbl">Skills</span><div class="sec-line"></div><span class="sec-num">06</span></div>
-            <div class="skl-grid">
-              <div class="skl-grp">
-                <div class="sg-lbl">Languages</div>
-                <div class="sg-pills"><span class="sg-pill">TypeScript</span><span class="sg-pill">Go</span><span class="sg-pill">Rust</span><span class="sg-pill">Python</span><span class="sg-pill">SQL</span><span class="sg-pill">C/C++</span></div>
-              </div>
-              <div class="skl-grp">
-                <div class="sg-lbl">Frontend</div>
-                <div class="sg-pills"><span class="sg-pill">React</span><span class="sg-pill">Next.js</span><span class="sg-pill">Tailwind</span><span class="sg-pill">HTML/CSS</span></div>
-              </div>
-              <div class="skl-grp">
-                <div class="sg-lbl">Backend</div>
-                <div class="sg-pills"><span class="sg-pill">Node.js</span><span class="sg-pill">Express</span><span class="sg-pill">PostgreSQL</span><span class="sg-pill">Redis</span><span class="sg-pill">gRPC</span></div>
-              </div>
-              <div class="skl-grp">
-                <div class="sg-lbl">Infrastructure</div>
-                <div class="sg-pills"><span class="sg-pill">Docker</span><span class="sg-pill">Kubernetes</span><span class="sg-pill">AWS</span><span class="sg-pill">GCP</span><span class="sg-pill">CI/CD</span></div>
-              </div>
-              <div class="skl-grp">
-                <div class="sg-lbl">Tools</div>
-                <div class="sg-pills"><span class="sg-pill">Git</span><span class="sg-pill">Linux</span><span class="sg-pill">Vim</span><span class="sg-pill">Figma</span></div>
-              </div>
+          <!-- SKILLS -->
+          <section class="resume-section" id="sec-skills">
+            <div class="section-heading">
+              <span class="section-label">Skills</span>
+              <div class="section-line"></div>
+              <span class="section-num">06</span>
+            </div>
+
+            <div class="skills-grid">
+              <!-- Dynamic skill pills will be injected here -->
             </div>
           </section>
 
-        </div><!-- end res-body -->
-      </div><!-- end res-layout -->
+
+        </div>
+      </div>
     </div>
+
+    <div class="color-bar bottom">
+      <div class="cs cs-red"></div><div class="cs cs-orange"></div>
+      <div class="cs cs-yellow"></div><div class="cs cs-white"></div>
+      <div class="cs cs-hatch"></div>
+    </div>
+    <footer class="bottom-bar">
+      <div class="bb-left">YOUR-NAME<br>RÉSUMÉ</div>
+      <div class="bb-center">YOUR NAME · CURRICULUM VITAE</div>
+      <div class="bb-right">REV 2025<br>OPEN TO WORK</div>
+    </footer>
   </div>
 
-  <div class="cbar"><div class="cs cs-r"></div><div class="cs cs-o"></div><div class="cs cs-y"></div><div class="cs cs-w"></div><div class="cs cs-h"></div></div>
-  <footer class="bbar">
-    <div class="bb-l">YOUR-NAME<br>RÉSUMÉ</div><!-- ← CHANGE -->
-    <div class="bb-c">YOUR NAME · CURRICULUM VITAE</div><!-- ← CHANGE -->
-    <div class="bb-r">REV 2025<br>OPEN TO WORK</div>
-  </footer>
-</div>
-
-<script src="nav.js"></script>
-<script>
-  // ── Section nav scroll spy ──
-  // Clicking a nav item smoothly scrolls to the matching section.
-  // Scrolling updates the active nav item automatically.
-  const resBody = document.getElementById('resBody');
-
-  document.querySelectorAll('.rn-item').forEach(item => {
-    item.addEventListener('click', () => {
-      document.querySelectorAll('.rn-item').forEach(x => x.classList.remove('on'));
-      item.classList.add('on');
-      const target = document.getElementById(item.dataset.sec);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  <script src="nav.js"></script>
+  <script src="data.js"></script>
+  <script>
+    // section nav scroll spy
+    const navItems = document.querySelectorAll('.rnav-item');
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const target = document.getElementById(item.dataset.target);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          navItems.forEach(n => n.classList.remove('active'));
+          item.classList.add('active');
+        }
+      });
     });
-  });
 
-  // Highlight nav item as user scrolls
-  resBody.addEventListener('scroll', () => {
-    let current = '';
-    document.querySelectorAll('.res-sec').forEach(sec => {
-      if (sec.offsetTop - resBody.offsetTop <= resBody.scrollTop + 40) current = sec.id;
+    // scroll spy update
+    const content = document.getElementById('resumeContent');
+    const sections = document.querySelectorAll('.resume-section');
+    content.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(sec => {
+        if (sec.offsetTop - content.offsetTop <= content.scrollTop + 60) {
+          current = sec.id;
+        }
+      });
+      navItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.target === current);
+      });
     });
-    document.querySelectorAll('.rn-item').forEach(i => {
-      i.classList.toggle('on', i.dataset.sec === current);
-    });
-  });
-</script>
+
+    function downloadPDF() {
+      window.print();
+    }
+  </script>
+
+  <style media="print">
+    .page-wrapper { position: static !important; }
+    .topbar, .color-bar, .bottom-bar, .resume-nav, .grid-overlay { display: none !important; }
+    .content-area { position: static !important; overflow: visible !important; top: 0 !important; bottom: 0 !important; }
+    .resume-layout { grid-template-columns: 1fr !important; }
+    .resume-content { padding: 20px !important; overflow: visible !important; }
+    body, html { overflow: visible !important; height: auto !important; background: white !important; }
+  </style>
 </body>
 </html>
